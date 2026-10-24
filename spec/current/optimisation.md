@@ -5,8 +5,9 @@ The optimisation metadata: what it is, what it decides and where it comes from.
 Derived from the log; where it disagrees with the log, the log wins (spec/README.md).
 
 **OPT-1** The structure that makes a program's data efficient is provided as **optimisation metadata**, kept
-separately from the feature-language program, and optional.
-Source: L426464
+separately from the feature-language program, and optional. It is written in the **optimisation language**, which
+also holds configuration such as the assignment of data zones to runtimes (RUN-1) (interpretation: J426533).
+Source: L426464, L426531, J426533
 
 **OPT-2** The optimisation metadata decides how the data is physically held (which values are stored and which
 recomputed, in memory and/or in a database, layouts and indexes). It changes performance, never results: what a
