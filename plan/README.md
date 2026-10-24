@@ -4,7 +4,8 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L427098); nothing of the language is built yet.
+place; what Upshot is about is specified (L426464 to L427101; L427115 under consideration); nothing of the language
+is built yet.
 
 ## Focus
 
@@ -20,6 +21,37 @@ values and actions (API-1 to API-6, ZONE-2, ZONE-3), with metaprogramming (META-
 written in the optimisation language (OPT-1 to OPT-7), which decides how that data is physically held and which
 runtime runs each zone (RUN-1) without changing what the program computes. All data is versioned and, ideally, the
 dataset reports its own state (VER-1, VER-2).
+
+## Under consideration: an authoritative, id-based persisted form
+
+L427115 (strongly considered, not yet decided): the programmer writes in a **user-facing language**, but the program
+is persisted in source control in an **authoritative language** in which every externally visible variable has a
+persistent, globally unique id (a GUID or OID), every reference uses the id, and the name is only a label. Renaming
+is free, a function moved from one API to another keeps its id, and components not tightly connected to the program
+(its optimisation metadata, programs that depend on its APIs, other zones) keep up through the ids.
+
+What it would settle or ease:
+- **Metadata in sync** (OPT-5): hints refer to ids, so renames and moves never break them.
+- **Migration** (MIG-1): renames and moves are no-ops for stored data; what is left to migrate is structural (a
+  field removed, a type changed, a source becoming computed), and an id-based diff states exactly that.
+- **Dependencies**: a dependency's refactoring reaches its users as id-preserving changes rather than breakage.
+
+Questions it raises:
+- *Who assigns ids, and how a rename is told from a delete plus an add.* Writing plain text in the user-facing
+  language loses that intent. Options: an editor or language server that tracks identity (the way projectional
+  editors do), explicit refactoring commands, or matching the new text to the old authoritative form on save
+  (heuristics, an LLM, the programmer confirming ambiguous cases).
+- *What gets an id*: "externally visible" variables (exposed values, actions, sources, computed values, types,
+  fields, zones, APIs); whether internal names need ids too.
+- *Readability in source control*: an authoritative text that still diffs and reviews well (e.g. each id next to
+  its current label), and merge conflicts when two branches create or rename the same element.
+- *Copy and paste*: whether a copied element keeps its id or gets a fresh one.
+- *Interaction with metaprogramming* (META-1): ids for structure computed at run time.
+
+Prior art to study: Unison (definitions identified by content hash, names stored apart as labels; research 01 §10),
+JetBrains MPS (projectional editing, references by persistent node id), Darklang (an id on every expression),
+Protocol Buffers field numbers and Cap'n Proto's 64-bit ids (persistent ids for schema elements, names free to
+change), Datomic attributes (entities referred to by id).
 
 ## Open questions
 
@@ -77,7 +109,8 @@ dataset reports its own state (VER-1, VER-2).
   and checking it, or refusing to run the new program until the data is repaired; this ties into migration.
 - **Migration** (MIG-1): how data follows a program change: renames, reshaped structures, a source becoming
   computed or the reverse, new constraints; how optimisation metadata that names program elements survives
-  renames; how versioned history reads across program versions. Tar Pit says almost nothing here: only that
+  renames (the id-based authoritative form above would settle this); how versioned history reads across program
+  versions. Tar Pit says almost nothing here: only that
   changes to the essential state's specification may force changes to the logic and the hints, never the
   reverse. Related work to study: Cambria's schema-version lenses (research 01 §4), Datomic's accrete-only schema
   and Dolt's schema diffs (§9).
