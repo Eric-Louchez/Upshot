@@ -25,6 +25,11 @@ values and its actions are written, and the **optimisation metadata**, kept apar
 J426464).
 Source: L426464, J426464
 
+**LANG-9** Upshot aims to allow, in theory, the best hand-tuned performance: every scenario in which its hard
+constraints would rule out an optimisation available to hand-tuned code is to be addressed (interpretation:
+J427530).
+Source: L427529, J427530
+
 ## Implementation and targets
 
 **LANG-2** Upshot is implemented in Rust.

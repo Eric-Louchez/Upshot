@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L427516; L427115 under consideration); nothing of the language
+place; what Upshot is about is specified (L426464 to L427529; L427115 under consideration); nothing of the language
 is built yet.
 
 ## Focus
@@ -18,7 +18,7 @@ Two parts (LANG-6): the **feature language**, in which a program states its data
 data sources and computed values (MODEL-2 to MODEL-4) and actions (ACT-1 to ACT-4) checked against validation
 constraints (CONS-1, CONS-2), divided into data zones (ZONE-1) that interact only through each other's APIs of exposed
 values and actions (API-1 to API-6, ZONE-2, ZONE-3), with metaprogramming (META-1); and the **optimisation metadata**,
-written in the optimisation language (OPT-1 to OPT-7), which decides how that data is physically held and which
+written in the optimisation language (OPT-1 to OPT-9), which decides how that data is physically held and which
 runtime runs each zone (RUN-1) without changing what the program computes. All data is versioned and, ideally, the
 dataset reports its own state (VER-1, VER-2).
 
@@ -84,7 +84,9 @@ change), Datomic attributes (entities referred to by id).
   (MIG-1), static checking and the native interface (LANG-3), which needs shapes known ahead of time.
 - **Exception handling** (ACT-4): how a function declares its handler, and what a handler receives (the failure,
   the rejected constraint); the handler runs as a separate action (L427098).
-- **The optimisation metadata** (OPT-1 to OPT-7; little to no work for now, LANG-7): its format, what it can
+- **Performance and relaxations** (OPT-8, OPT-9, LANG-9): optimisations that Upshot's hard constraints rule out,
+  and a proposal to recover them as declared sets of acceptable results: [`performance.md`](performance.md).
+- **The optimisation metadata** (OPT-1 to OPT-9; little to no work for now, LANG-7): its format, what it can
   express (storage, in memory and/or database, indexes, materialised computed values), the default strategy
   without it (J426465), and how usage metrics are collected for generating it. Which databases it targets first
   (local; no cloud, LANG-4).
