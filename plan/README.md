@@ -13,12 +13,13 @@ the prototype runs every program under its default strategy (J426465). No other 
 
 ## The shape of Upshot
 
-Two parts (LANG-6): the **feature language**, in which a program states its data as maintainable structures
-(MODEL-1), data sources and computed values (MODEL-2 to MODEL-4) and actions (ACT-1, ACT-2), divided into data
-zones (ZONE-1) that interact only through each other's APIs of exposed values and actions (API-1 to API-3, ZONE-2);
-and the **optimisation metadata**, written in the optimisation language (OPT-1 to OPT-4), which decides how that data
-is physically held and which runtime runs each zone (RUN-1) without changing what the program computes. All
-data is versioned and, ideally, the dataset reports its own state (VER-1, VER-2).
+Two parts (LANG-6): the **feature language**, in which a program states its data as maintainable structures (MODEL-1),
+data sources and computed values (MODEL-2 to MODEL-4) and actions (ACT-1 to ACT-3) checked against validation
+constraints (CONS-1, CONS-2), divided into data zones (ZONE-1) that interact only through each other's APIs of exposed
+values and actions (API-1 to API-3, ZONE-2); and the **optimisation metadata**, written in the optimisation language
+(OPT-1 to OPT-6), which decides how that data is physically held and which runtime runs each zone (RUN-1) without
+changing what the program computes. All data is versioned and, ideally, the dataset reports its own state (VER-1,
+VER-2).
 
 ## Open questions
 
@@ -68,9 +69,9 @@ data is versioned and, ideally, the dataset reports its own state (VER-1, VER-2)
   - is a value's version history read directly, or as an explicit list through observables (VER-3)?
   - are observer results automatic computed values, or components that trigger actions producing their own,
     separate change sets?
-  - *long propagations*: while a change propagates, values can pass through intermediate states (Claude reads the
-    log's "propagation stays properties" as propagation-state properties), and one source change can produce
-    several successive versions of the same value elsewhere. Whether those intermediate versions are visible,
+  - *long propagations*: long propagations may call for **propagation status properties** (values reporting how
+    far a change has propagated, L427008 as corrected by L427057), and as these change, one source change can
+    produce several successive versions of the same value elsewhere. Whether those intermediate versions are visible,
     and how they relate to self-inspection (VER-2), is unresolved. Timely dataflow's frontiers (research 01 §9)
     are one model: a version is visible only once everything before it is complete.
   - what a version is (per value, per dataset, per action), and how long history is kept.
