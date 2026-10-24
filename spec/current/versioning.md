@@ -13,3 +13,7 @@ Source: L426464, J426469
 recomputed or the latest version not being available yet (interpretation: J426470). This is a goal, not yet a hard
 requirement.
 Source: L426464, J426470
+
+**VER-3** Values have a version history, and a program has access to it. Whether the history is read directly or as
+an explicit list through observables is not yet decided (`plan/README.md`).
+Source: L427008

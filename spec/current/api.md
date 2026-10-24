@@ -13,5 +13,5 @@ Source: L426531
 
 **API-3** An exposed value can be exposed as read/write; otherwise it is read-only. A read/write exposed value is a
 data source or a bidirectional computed value (MODEL-4), since a write follows the action rules (ACT-2); a one-way
-computed value can only be exposed read-only (interpretation: J426531).
-Source: L426531, J426531
+computed value can only be exposed read-only (MODEL-8; interpretation: J426531).
+Source: L426531, J426531, L427008

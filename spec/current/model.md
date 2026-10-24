@@ -16,8 +16,9 @@ Source: L426464
 
 **MODEL-2** The feature language marks some data as **data sources**; all other data is **computed**. A data source
 holds data as given; computed data is defined over other data and stays consistent with it (interpretation:
-J426466).
-Source: L426464, J426466
+J426466). The program's design always specifies its sources, even where two-way computed values let the runtime
+persist another form (OPT-3).
+Source: L426464, J426466, L427008
 
 **MODEL-3** Computed values include counts, averages and arbitrary computed values, and computed collections.
 Source: L426464
@@ -26,6 +27,15 @@ Source: L426464
 so either the value or its sources can be the persisted form, and writing to the value is carried back to its
 sources (interpretation: J426467). Which form is persisted is decided by the optimisation metadata (OPT-3).
 Source: L426464, J426467
+
+**MODEL-8** A computed value is writable only if it is two-way all the way back to all of its sources; any other
+computed value is read-only (interpretation: J427010).
+Source: L427008, J427010
+
+**MODEL-9** Actions can convert a computed value into a source value, keeping its value and disconnecting it from
+what it was computed from, and, in principle, a source value into a computed value (interpretation: J427009). Any
+computed value can be converted to a source this way.
+Source: L427008, J427009
 
 ## Objects of computed collections
 

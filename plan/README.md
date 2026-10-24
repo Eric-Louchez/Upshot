@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464, L426531); nothing of the language is built yet.
+place; what Upshot is about is specified (L426464, L426531, L427008); nothing of the language is built yet.
 
 ## Focus
 
@@ -35,7 +35,7 @@ data is versioned and, ideally, the dataset reports its own state (VER-1, VER-2)
   through their APIs inside one process, and how a C/C++ program reaches a zone's API (LANG-3).
 - **APIs and zones** (API-1 to API-3, ZONE-1, ZONE-2): whether an API can span zones or a zone has several APIs,
   and whether one zone's computed values may depend on another zone's exposed values (and how they stay current).
-- **The optimisation metadata** (OPT-1 to OPT-4; little to no work for now, LANG-7): its format, what it can
+- **The optimisation metadata** (OPT-1 to OPT-6; little to no work for now, LANG-7): its format, what it can
   express (storage, in memory and/or database, indexes, materialised computed values), the default strategy
   without it (J426465), and how usage metrics are collected for generating it. Which databases it targets first
   (local; no cloud, LANG-4).
@@ -45,6 +45,32 @@ data is versioned and, ideally, the dataset reports its own state (VER-1, VER-2)
   in the feature language (OPT-2 and J426465 keep results out of the metadata). How long the runtime keeps state
   that can no longer be observed (A's values for a key that can never come back, B's values once gone, old
   versions beyond what VER-1 keeps readable) is an optimisation concern. Related work: research 01.
-- **Actions** (ACT-1, ACT-2): provisional (J426468); transactions, concurrency, and validation of inputs.
-- **Versioning** (VER-1, VER-2): what a version is (per value, per dataset, per action), how long history is kept,
-  and how self-inspection appears in the language.
+- **Actions** (ACT-1 to ACT-3): provisional (J426468); concurrency between actions. *Within an atomic action*: an
+  action that updates sources and then needs computed values that depend on those updates, to continue. Redoing
+  the computations by hand in the action works in theory but is not practical (L427008). Candidates: the action
+  reads a tentative view in which its own changes so far are applied and propagated (as databases let a
+  transaction read its own writes), committed or discarded as a whole with the constraint check (CONS-2) at the
+  end.
+- **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
+  gets (one declared in the program, or one the action supplies), and whether the program declares which values
+  may be converted.
+- **Validation constraints** (CONS-1, CONS-2): syntax; whether a constraint can be scoped to an object or
+  collection; what happens when a program change (a new computation function) makes existing data violate a
+  constraint. Tar Pit (research 01 §1, its §10.3.3) suggests treating the program change like a change to data
+  and checking it, or refusing to run the new program until the data is repaired; this ties into migration.
+- **Migration** (MIG-1): how data follows a program change: renames, reshaped structures, a source becoming
+  computed or the reverse, new constraints; how optimisation metadata that names program elements survives
+  renames; how versioned history reads across program versions. Tar Pit says almost nothing here: only that
+  changes to the essential state's specification may force changes to the logic and the hints, never the
+  reverse. Related work to study: Cambria's schema-version lenses (research 01 §4), Datomic's accrete-only schema
+  and Dolt's schema diffs (§9).
+- **Observers and history** (VER-1 to VER-3): observers are not yet defined (L427008). Questions:
+  - is a value's version history read directly, or as an explicit list through observables (VER-3)?
+  - are observer results automatic computed values, or components that trigger actions producing their own,
+    separate change sets?
+  - *long propagations*: while a change propagates, values can pass through intermediate states (Claude reads the
+    log's "propagation stays properties" as propagation-state properties), and one source change can produce
+    several successive versions of the same value elsewhere. Whether those intermediate versions are visible,
+    and how they relate to self-inspection (VER-2), is unresolved. Timely dataflow's frontiers (research 01 §9)
+    are one model: a version is visible only once everything before it is complete.
+  - what a version is (per value, per dataset, per action), and how long history is kept.

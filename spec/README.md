@@ -16,6 +16,8 @@ What is built, as the user asked for it.
 | [`current/api.md`](current/api.md) | API- | APIs: exposed values (read-only or read/write) and exposed actions. |
 | [`current/zones.md`](current/zones.md) | ZONE- | Data zones and how they interact. |
 | [`current/runtime.md`](current/runtime.md) | RUN- | Runtimes: the assignment of zones to runtimes, the prototype runtime, later runtimes. |
+| [`current/constraints.md`](current/constraints.md) | CONS- | Validation constraints and the rejection of actions that break them. |
+| [`current/migration.md`](current/migration.md) | MIG- | How existing data follows changes to the program. |
 | [`current/model.md`](current/model.md) | MODEL- | The data a program describes: data structures, data sources, computed and bidirectional values. |
 | [`current/optimisation.md`](current/optimisation.md) | OPT- | The optimisation metadata: what it decides and where it comes from. |
 | [`current/actions.md`](current/actions.md) | ACT- | Actions: how a program changes its data. |
