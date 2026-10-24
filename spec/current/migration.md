@@ -18,10 +18,11 @@ Source: L427237
 
 ## Program versions and the migration transform
 
-**MIG-3** A program can hold parallel versions of its code: a snapshot of the whole program is kept for each version
-that migrations must support. Upgrades are hot, with no downtime: the migration is a single transaction between
-actions (MIG-6), not a stop of the system (interpretation: J427505).
-Source: L427445, L427505, J427505
+**MIG-3** A program can hold parallel versions of its code: for each earlier version that migrations must support,
+its computation functions are kept, along with the migrations. A version is kept as long as some dataset that might
+still be migrated uses its schema (interpretation: J427518). Upgrades are hot, with no downtime: the migration is a
+single transaction between actions (MIG-6), not a stop of the system (interpretation: J427505).
+Source: L427445, L427505, J427505, L427516, J427518
 
 **MIG-4** Each new version comes with a **migration transform** from the old program to the new one: it migrates the
 old version's data zones to the source values of the new version's data zones. With metaprogramming (META-1) a
@@ -45,3 +46,14 @@ Source: L427445, J427448, L427505, J427505
 **MIG-7** A migration never rewrites the version history. After it, some values may no longer exist (as identified by
 their instance id) and new values may exist with no history from before the migration; neither is new to the system.
 Source: L427445
+
+## Clients and APIs across a migration
+
+**MIG-8** After a migration, a client using an API built for the old version can continue using it if the API is
+unchanged or compatible: all the components the client uses are unchanged. Otherwise the client is rejected
+(interpretation: J427516).
+Source: L427516, J427516
+
+**MIG-9** API versioning needs no dedicated language feature: a developer can keep an old API, maintained against the
+new version's data zone, alongside a new API (interpretation: J427517).
+Source: L427516, J427517

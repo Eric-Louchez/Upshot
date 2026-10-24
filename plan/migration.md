@@ -14,9 +14,13 @@ L427445 settles the main design (MIG-3 to MIG-7, VER-4); the sections below are 
 - **Parallel program versions** (MIG-3): a snapshot of the whole program is kept for each supported version.
 - **One sequence of transactions** (MIG-6, L427505): the migration is one atomic transaction among the actions;
   actions before it apply to the old schema, actions after it to the new. Upgrades are hot because the migration is
-  a single transaction, not a stop. This answers §5 question 1 (one atomic step, not online or lazy) and most of
-  question 6: an action is never split across versions (P3). Still open: what happens to a client or session built
-  against the old version's API that submits an action after the migration.
+  a single transaction, not a stop. This answers §5 question 1 (one atomic step, not online or lazy) and question 6:
+  an action is never split across versions (P3), and a client of the old API continues after the migration if every
+  component it uses is unchanged, otherwise it is rejected (MIG-8, L427516).
+- **API versions are ordinary APIs** (MIG-9, API-1): a zone can keep an old API over the new data next to a new one.
+  This answers §5 question 8: no accrete-only discipline is built in; a developer can choose it.
+- **What is kept of old versions** (MIG-3, L427516): their computation functions (with the migrations), as long as a
+  dataset that may still be migrated uses that schema.
 - **The migration transform** (MIG-4) goes from the old version's data zones to the new version's sources. It is a
   metaprogramming operation (META-1), or a built-in one of the same kind. §3.1's classification still says which
   parts of it Upshot can supply automatically.
@@ -31,8 +35,7 @@ L427445 settles the main design (MIG-3 to MIG-7, VER-4); the sections below are 
   question 2 (history spans program changes, P4).
 
 Still open from §5: whether the transform is a lens by default (question 5), cut-over of zones on different runtimes
-(7), accrete-only APIs (8), declaring convertible values (9), persistent ids (10), and when an old version stops
-being served.
+(7), declaring convertible values (9) and persistent ids (10).
 
 ## 1 Framing
 

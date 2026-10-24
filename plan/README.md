@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L427505; L427115 under consideration); nothing of the language
+place; what Upshot is about is specified (L426464 to L427516; L427115 under consideration); nothing of the language
 is built yet.
 
 ## Focus
@@ -66,8 +66,8 @@ change), Datomic attributes (entities referred to by id).
   what happens when a write cannot be carried back unambiguously.
 - **The prototype runtime** (RUN-2): in-memory only at first, or with a local store; how zones talk to each other
   through their APIs inside one process, and how a C/C++ program reaches a zone's API (LANG-3).
-- **APIs and zones** (API-1 to API-3, ZONE-1, ZONE-2): whether an API can span zones or a zone has several APIs,
-  and whether one zone's computed values may depend on another zone's exposed values (and how they stay current).
+- **APIs and zones** (API-1 to API-3, ZONE-1, ZONE-2): whether an API can span zones (a zone can have several,
+  API-1), and whether one zone's computed values may depend on another zone's exposed values (and how they stay current).
 - **Configuration values and web backends** (API-4 to API-6, ZONE-3, LANG-8): the suggested structure is the user
   zone and shared zone of ZONE-3. Open:
   - *a simpler way to state configuration values* (L427098 asks for one). *Proposal:* an API with configuration
