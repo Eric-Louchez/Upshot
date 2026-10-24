@@ -10,5 +10,5 @@ like computed values (they may use computed values and arbitrary computation fun
 Source: L427008, J427008
 
 **CONS-2** An action that would make a constraint false is rejected: none of its changes take effect (ACT-3;
-interpretation: J427008).
-Source: L427008, J427008
+interpretation: J427008). The rejection is a failure that an exception-handling function can handle (ACT-4).
+Source: L427008, J427008, L427076

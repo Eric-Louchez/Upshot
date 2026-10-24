@@ -15,3 +15,12 @@ Source: L426531
 data source or a bidirectional computed value (MODEL-4), since a write follows the action rules (ACT-2); a one-way
 computed value can only be exposed read-only (MODEL-8; interpretation: J426531).
 Source: L426531, J426531, L427008
+
+**API-4** An API can declare **mandatory source values** that the runtime or the harness embedding it must provide
+whenever the API is used; in a web app, one of them is the current user. They belong to that use of the API (a
+session or request), not to the zone's stored data (interpretation: J427077).
+Source: L427076, J427077
+
+**API-5** An API's exposed values and actions can be defined relative to its mandatory source values, so the API
+presents a slice of its data zone that pivots on them (e.g. the current user's data).
+Source: L427076

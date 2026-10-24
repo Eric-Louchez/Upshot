@@ -36,6 +36,11 @@ Source: L426443, J426444
 
 ## Out of scope
 
+**LANG-8** Upshot is not meant to replace today's programming languages completely. Parts of an application that
+suit it poorly, such as the authentication and authorization layers of a web app, can stay in other code (the
+harness), which supplies an API's mandatory source values (API-4).
+Source: L427076
+
 **LANG-4** The project has no cloud infrastructure and no website of its own. Runtimes that serve a zone as a web
 API in the cloud may exist ultimately (RUN-3); they are products of Upshot, not infrastructure of this project, and
 out of scope for now (interpretation: J426534).
