@@ -21,5 +21,5 @@ both with the current user as a configuration value (API-4).
 - The user zone has direct access only to data the user is allowed to see, and can perform only actions the user is
   allowed to take; its API presents to the client all the data the client needs, in the shape it needs.
 - The client uses the user zone's API only, and the user zone reaches shared data through the shared zone's API
-  (interpretation: J427098).
-Source: L427098, J427098
+  (interpretation: J427098, confirmed by L427101).
+Source: L427098, J427098, L427101
