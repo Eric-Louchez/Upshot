@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L427076); nothing of the language is built yet.
+place; what Upshot is about is specified (L426464 to L427098); nothing of the language is built yet.
 
 ## Focus
 
@@ -16,10 +16,10 @@ the prototype runs every program under its default strategy (J426465). No other 
 Two parts (LANG-6): the **feature language**, in which a program states its data as maintainable structures (MODEL-1),
 data sources and computed values (MODEL-2 to MODEL-4) and actions (ACT-1 to ACT-4) checked against validation
 constraints (CONS-1, CONS-2), divided into data zones (ZONE-1) that interact only through each other's APIs of exposed
-values and actions (API-1 to API-5, ZONE-2); and the **optimisation metadata**, written in the optimisation language
-(OPT-1 to OPT-6), which decides how that data is physically held and which runtime runs each zone (RUN-1) without
-changing what the program computes. All data is versioned and, ideally, the dataset reports its own state (VER-1,
-VER-2).
+values and actions (API-1 to API-6, ZONE-2, ZONE-3), with metaprogramming (META-1); and the **optimisation metadata**,
+written in the optimisation language (OPT-1 to OPT-7), which decides how that data is physically held and which
+runtime runs each zone (RUN-1) without changing what the program computes. All data is versioned and, ideally, the
+dataset reports its own state (VER-1, VER-2).
 
 ## Open questions
 
@@ -36,16 +36,23 @@ VER-2).
   through their APIs inside one process, and how a C/C++ program reaches a zone's API (LANG-3).
 - **APIs and zones** (API-1 to API-3, ZONE-1, ZONE-2): whether an API can span zones or a zone has several APIs,
   and whether one zone's computed values may depend on another zone's exposed values (and how they stay current).
-- **Structuring a web backend** (API-4, API-5, LANG-8): the prescriptive way to build one with Upshot. *Proposal:*
-  one data zone holds every user's data; its API declares the current user as a mandatory source value, supplied
-  per request by the harness after authentication, and exposes only values and actions defined relative to it, so
-  each user sees and acts on their own slice. Authentication stays in the harness; authorization is at least
-  partly expressed by what the API exposes relative to the current user, with checks needing more than that left
-  to the harness. Open: whether mandatory source values are versioned like other data; whether one zone has one
-  API per audience (users, admins); and how a session's API slice is observed as it changes.
-- **Exception handling** (ACT-4): how a function declares its handler, what a handler receives (the failure, the
-  rejected constraint), and whether a handler's work joins the caller's atomic action or runs as its own.
-- **The optimisation metadata** (OPT-1 to OPT-6; little to no work for now, LANG-7): its format, what it can
+- **Configuration values and web backends** (API-4 to API-6, ZONE-3, LANG-8): the suggested structure is the user
+  zone and shared zone of ZONE-3. Open:
+  - *a simpler way to state configuration values* (L427098 asks for one). *Proposal:* an API with configuration
+    values is a **parameterised API**: a function from its configuration values to an API instance, as a function
+    from arguments to a result. Each session holds one instance; everything computed inside is computed per
+    argument, and two sessions with the same user share one instance. Sharing, caching and dropping instances is
+    memoisation, an optimisation concern (OPT-7). Prior art: Skip's parameterised *resources* (research 01 §6).
+  - *several APIs for different audiences* (users, admins): either a zone declares several APIs and the harness
+    picks one per session, or one API whose exposed values and actions are computed from the user's role
+    (META-1). With parameterised APIs the two meet: the role is a configuration value, and the API's shape is
+    computed from it.
+- **Metaprogramming** (META-1): what can be computed (types, fields, collections, APIs, constraints?), when (once
+  per program version, per session, or at any time), and how a computed structure interacts with migration
+  (MIG-1), static checking and the native interface (LANG-3), which needs shapes known ahead of time.
+- **Exception handling** (ACT-4): how a function declares its handler, and what a handler receives (the failure,
+  the rejected constraint); the handler runs as a separate action (L427098).
+- **The optimisation metadata** (OPT-1 to OPT-7; little to no work for now, LANG-7): its format, what it can
   express (storage, in memory and/or database, indexes, materialised computed values), the default strategy
   without it (J426465), and how usage metrics are collected for generating it. Which databases it targets first
   (local; no cloud, LANG-4).

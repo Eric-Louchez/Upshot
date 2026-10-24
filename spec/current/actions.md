@@ -21,6 +21,7 @@ changes so far, before it completes, is not yet decided (`plan/README.md`).
 Source: L427008, J427008
 
 **ACT-4** Functions (actions and computation functions) may contain exception handling: a failed function triggers
-an exception-handling function. A failed action's own changes still never take effect; the handler's work is its
-own and can leave a trace (interpretation: J427076).
-Source: L427076, J427076
+an exception-handling function. A failed action's own changes still never take effect; the handler runs as a
+separate action of its own, whose changes can take effect. A failure with no handler passes to the caller
+(interpretation: J427076, confirmed by L427098).
+Source: L427076, J427076, L427098

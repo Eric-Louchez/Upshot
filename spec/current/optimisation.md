@@ -30,3 +30,7 @@ Source: L427008
 **OPT-6** One feature-language program can have several sets of optimisation metadata, e.g. one per runtime or per
 deployment (interpretation: J427011).
 Source: L427008, J427011
+
+**OPT-7** How the parallel computed values of an API's configuration values (API-6) are held, cached, kept or
+recomputed every time, is decided by the optimisation layer.
+Source: L427098
