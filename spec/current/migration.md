@@ -19,9 +19,9 @@ Source: L427237
 ## Program versions and the migration transform
 
 **MIG-3** A program can hold parallel versions of its code: a snapshot of the whole program is kept for each version
-that migrations must support. Old and new versions run in parallel during an upgrade, which makes hot upgrades with
-no downtime possible (interpretation: J427446).
-Source: L427445, J427446
+that migrations must support. Upgrades are hot, with no downtime: the migration is a single transaction between
+actions (MIG-6), not a stop of the system (interpretation: J427505).
+Source: L427445, L427505, J427505
 
 **MIG-4** Each new version comes with a **migration transform** from the old program to the new one: it migrates the
 old version's data zones to the source values of the new version's data zones. With metaprogramming (META-1) a
@@ -34,9 +34,11 @@ the same format, data type and structure, even if the old value is a computed va
 how the other source values are obtained (interpretation: J427447).
 Source: L427445, J427447
 
-**MIG-6** The migration runs like a normal action, with its own transaction version: it is atomic and checked against
-the new version's constraints (ACT-3, CONS-2; interpretation: J427448).
-Source: L427445, J427448
+**MIG-6** The migration is an atomic transaction that runs like a normal action, with its own transaction version,
+checked against the new version's constraints (ACT-3, CONS-2; interpretation: J427448). Actions before the migration
+apply to the old data schema; actions after it apply to the new one. Old and new versions never both accept actions
+on the same data (interpretation: J427505).
+Source: L427445, J427448, L427505, J427505
 
 ## History
 

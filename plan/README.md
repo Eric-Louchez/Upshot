@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L427445; L427115 under consideration); nothing of the language
+place; what Upshot is about is specified (L426464 to L427505; L427115 under consideration); nothing of the language
 is built yet.
 
 ## Focus
@@ -108,9 +108,9 @@ change), Datomic attributes (entities referred to by id).
   constraint. Tar Pit (research 01 §1, its §10.3.3) suggests treating the program change like a change to data
   and checking it, or refusing to run the new program until the data is repaired; this ties into migration.
 - **Migration** (MIG-1 to MIG-7): decided in outline (L427445): parallel program versions kept as snapshots, a
-  migration transform from the old zones to the new sources, automatic where structure matches, run as an action,
-  history never rewritten, hot upgrades. The taxonomy, mechanisms and remaining questions are in
-  [`migration.md`](migration.md).
+  migration transform from the old zones to the new sources, automatic where structure matches, run as one atomic
+  transaction between actions (L427505), history never rewritten, hot upgrades. The taxonomy, mechanisms and
+  remaining questions are in [`migration.md`](migration.md).
 - **Observers and history** (VER-1 to VER-3): observers are not yet defined (L427008). Questions:
   - is a value's version history read directly, or as an explicit list through observables (VER-3)?
   - are observer results automatic computed values, or components that trigger actions producing their own,

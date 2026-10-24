@@ -11,9 +11,12 @@ data), §13 (identity and lifetime in computed collections).
 ## Decided since this study (L427445)
 
 L427445 settles the main design (MIG-3 to MIG-7, VER-4); the sections below are read in its light:
-- **Parallel program versions** (MIG-3): a snapshot of the whole program is kept for each supported version; old and
-  new versions run in parallel during an upgrade, so upgrades are hot, with no downtime. This answers §5 question 1
-  (not one blocking step) and question 6 (in-flight actions and open sessions finish on the old version, P3).
+- **Parallel program versions** (MIG-3): a snapshot of the whole program is kept for each supported version.
+- **One sequence of transactions** (MIG-6, L427505): the migration is one atomic transaction among the actions;
+  actions before it apply to the old schema, actions after it to the new. Upgrades are hot because the migration is
+  a single transaction, not a stop. This answers §5 question 1 (one atomic step, not online or lazy) and most of
+  question 6: an action is never split across versions (P3). Still open: what happens to a client or session built
+  against the old version's API that submits an action after the migration.
 - **The migration transform** (MIG-4) goes from the old version's data zones to the new version's sources. It is a
   metaprogramming operation (META-1), or a built-in one of the same kind. §3.1's classification still says which
   parts of it Upshot can supply automatically.
@@ -181,7 +184,7 @@ Changing an action's body has no effect on stored data (L427237: "should not be 
 | Actions queued or in flight at the switch-over | validated and written against the old program | Choice (below) |
 | History naming the action that produced a version (if provenance is kept) | refers to an old action | Auto with ids |
 
-**Proposal P3 — an action runs entirely under one program version.** At the switch-over, in-flight actions either
+**Proposal P3 — an action runs entirely under one program version** (decided in substance by MIG-6). At the switch-over, in-flight actions either
 finish under the old program before the migration runs (drain), or are rejected and reported as failures (ACT-4)
 and retried by their caller. Queued actions not yet started are run under the new program, which is a Break for
 their signature if it changed. Draining is simplest and matches ACT-3's atomicity; it requires the migration to run
