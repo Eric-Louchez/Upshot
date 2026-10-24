@@ -1,0 +1,66 @@
+#!/bin/sh
+# Entry point for the Upshot tooling (Rust; the Cargo workspace is Cargo.toml at the repository root).
+#   tooling/up test                      check the workspace: cargo fmt --check, cargo clippy (all targets,
+#                                        -D warnings), cargo test
+#   tooling/up spec-id L|J <latest> [<count>] [--no-git]
+#                                        print <count> new date-based ids for log entries (L) or interpretation rows (J):
+#                                        from the minutes since 2026-01-01T00:00Z now, or <latest> (the latest id in
+#                                        use, 0 for none) + 1 if higher, each moved up past ids in use here or at
+#                                        origin/main (--no-git: here only) (spec/README.md)
+#   tooling/up spec-check               check the spec's ids and log headings (duplicates, format, order, month,
+#                                        dangling citations); exit 1 with the list, else print the counts
+# Needs cargo: if none is found, rustup is installed into ~/.cargo with the stable toolchain (once per machine or
+# cloud container); `test` also adds clippy and rustfmt when missing.
+set -e
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+root=$(dirname "$here")
+
+die() { echo "up: $*" >&2; exit 1; }
+
+# Sets $cargo: the one on PATH, else ours in ~/.cargo, installing rustup there when missing.
+need_cargo() {
+    cargo=$(command -v cargo 2>/dev/null || true)
+    [ -n "$cargo" ] || cargo=$HOME/.cargo/bin/cargo
+    [ -x "$cargo" ] && return 0
+    echo "up: installing rustup into ~/.cargo (first use only)" >&2
+    curl -sSfL --proto '=https' --tlsv1.2 https://sh.rustup.rs | sh -s -- -y --profile minimal \
+        --default-toolchain stable --component clippy,rustfmt --no-modify-path >&2 || die "the rustup install failed"
+    cargo=$HOME/.cargo/bin/cargo
+    [ -x "$cargo" ] || die "no cargo after the rustup install"
+}
+
+# need_cargo, plus clippy and rustfmt (for `test` only), added through rustup when missing.
+need_lints() {
+    need_cargo
+    "$cargo" clippy --version >/dev/null 2>&1 && "$cargo" fmt --version >/dev/null 2>&1 && return 0
+    rustup=$(command -v rustup 2>/dev/null || true)
+    [ -n "$rustup" ] || rustup=$(dirname "$cargo")/rustup
+    [ -x "$rustup" ] || die "clippy or rustfmt is missing and there is no rustup to add them"
+    "$rustup" component add clippy rustfmt >&2 || die "cannot add clippy and rustfmt"
+}
+
+# The spec tools, run from the repository root.
+spec_tools() {
+    need_cargo
+    cd "$root"
+    UP_REPOSITORY=$root exec "$cargo" run --quiet -p upshot-spec-tools --bin spec-tools -- "$@"
+}
+
+command=${1-}
+[ $# -gt 0 ] && shift
+case $command in
+    test)
+        [ $# -eq 0 ] || die "test: no arguments expected"
+        need_lints
+        cd "$root"
+        "$cargo" fmt --all --check
+        "$cargo" clippy --workspace --all-targets -- -D warnings
+        "$cargo" test --workspace ;;
+    spec-id)
+        spec_tools id "$@" ;;
+    spec-check)
+        spec_tools check "$@" ;;
+    *)
+        sed -n '2,/^[^#]/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//' >&2
+        [ "$command" = -h ] || [ "$command" = --help ] || exit 2 ;;
+esac
