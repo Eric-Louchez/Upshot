@@ -12,7 +12,11 @@ What is built, as the user asked for it.
 
 | File | Ids | What it covers |
 |---|---|---|
-| [`current/language.md`](current/language.md) | LANG- | What Upshot is, what it is implemented in, what it targets and what is out of scope. |
+| [`current/language.md`](current/language.md) | LANG- | What Upshot is and why, its two parts (the feature language and the optimisation metadata), what it is implemented in, what it targets and what is out of scope. |
+| [`current/model.md`](current/model.md) | MODEL- | The data a program describes: data structures, data sources, computed and bidirectional values. |
+| [`current/optimisation.md`](current/optimisation.md) | OPT- | The optimisation metadata: what it decides and where it comes from. |
+| [`current/actions.md`](current/actions.md) | ACT- | Actions: how a program changes its data. |
+| [`current/versioning.md`](current/versioning.md) | VER- | Versioned data and the dataset's self-inspection. |
 
 ## Log files
 

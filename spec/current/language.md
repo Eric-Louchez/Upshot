@@ -1,13 +1,28 @@
 # Language — current specification
 
-What Upshot is, what it is implemented in, what it targets and what is out of scope.
+What Upshot is and why, its two parts, what it is implemented in, what it targets and what is out of scope. The
+data a program describes is in [`model.md`](model.md); the optimisation metadata in
+[`optimisation.md`](optimisation.md); actions in [`actions.md`](actions.md); versions in
+[`versioning.md`](versioning.md).
 
 Derived from the log; where it disagrees with the log, the log wins (spec/README.md).
 
 ## Purpose
 
-**LANG-1** Upshot is a language for the data-driven aspects of development.
-Source: L426443
+**LANG-1** Upshot is a language for the data-driven aspects of development: managing a program's data, whether in
+memory and/or in a database, without having to architect its data structures for efficiency.
+Source: L426443, L426464
+
+**LANG-5** Today data held in memory and/or in a database must have its data structures architected carefully and
+efficiently, which interferes with maintainability and feature velocity. In Upshot a program defines its data
+structures in the way that best serves maintenance and feature development, and the structure that makes it
+efficient is provided separately, as optional optimisation metadata (`optimisation.md`).
+Source: L426464
+
+**LANG-6** Upshot has two parts: the **feature language**, in which the program, its data structures, its computed
+values and its actions are written, and the **optimisation metadata**, kept apart from the program (interpretation:
+J426464).
+Source: L426464, J426464
 
 ## Implementation and targets
 
