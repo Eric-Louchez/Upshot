@@ -1,7 +1,8 @@
 # Language — current specification
 
 What Upshot is and why, its two parts, what it is implemented in, what it targets and what is out of scope. The
-data a program describes is in [`model.md`](model.md); the optimisation metadata in
+data a program describes is in [`model.md`](model.md); APIs in [`api.md`](api.md); data zones in
+[`zones.md`](zones.md); runtimes in [`runtime.md`](runtime.md); the optimisation metadata in
 [`optimisation.md`](optimisation.md); actions in [`actions.md`](actions.md); versions in
 [`versioning.md`](versioning.md).
 
@@ -35,5 +36,18 @@ Source: L426443, J426444
 
 ## Out of scope
 
-**LANG-4** The project has no cloud infrastructure and no website.
-Source: L426443
+**LANG-8** Upshot is not meant to replace today's programming languages completely. Parts of an application that
+suit it poorly, such as the authentication and authorization layers of a web app, can stay in other code (the
+harness), which supplies an API's mandatory source values (API-4).
+Source: L427076
+
+**LANG-4** The project has no cloud infrastructure and no website of its own. Runtimes that serve a zone as a web
+API in the cloud may exist ultimately (RUN-3); they are products of Upshot, not infrastructure of this project, and
+out of scope for now (interpretation: J426534).
+Source: L426443, L426531, J426534
+
+## Current focus
+
+**LANG-7** For the foreseeable future the work is focused on the feature language with a prototype runtime (RUN-2),
+with little to no work on the optimisation language (OPT-1).
+Source: L426531
