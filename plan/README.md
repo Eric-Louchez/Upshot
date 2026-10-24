@@ -39,6 +39,12 @@ data is versioned and, ideally, the dataset reports its own state (VER-1, VER-2)
   express (storage, in memory and/or database, indexes, materialised computed values), the default strategy
   without it (J426465), and how usage metrics are collected for generating it. Which databases it targets first
   (local; no cloud, LANG-4).
+- **Identity and lifetime of objects in computed collections** (MODEL-5 to MODEL-7): the syntax for an object's
+  identity (a key expression per computed collection) and for choosing A, B or C. *Proposal:* split lifetime in
+  two. Which source values an object sees after it leaves and re-enters (A, B, C) changes results, so it is stated
+  in the feature language (OPT-2 and J426465 keep results out of the metadata). How long the runtime keeps state
+  that can no longer be observed (A's values for a key that can never come back, B's values once gone, old
+  versions beyond what VER-1 keeps readable) is an optimisation concern. Related work: research 01.
 - **Actions** (ACT-1, ACT-2): provisional (J426468); transactions, concurrency, and validation of inputs.
 - **Versioning** (VER-1, VER-2): what a version is (per value, per dataset, per action), how long history is kept,
   and how self-inspection appears in the language.
