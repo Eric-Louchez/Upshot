@@ -187,11 +187,11 @@ Changing an action's body has no effect on stored data (L427237: "should not be 
 | Actions queued or in flight at the switch-over | validated and written against the old program | Choice (below) |
 | History naming the action that produced a version (if provenance is kept) | refers to an old action | Auto with ids |
 
-**Proposal P3 — an action runs entirely under one program version** (decided in substance by MIG-6). At the switch-over, in-flight actions either
-finish under the old program before the migration runs (drain), or are rejected and reported as failures (ACT-4)
-and retried by their caller. Queued actions not yet started are run under the new program, which is a Break for
-their signature if it changed. Draining is simplest and matches ACT-3's atomicity; it requires the migration to run
-between two versions of the dataset, never inside an action.
+**Proposal P3 — an action runs entirely under one program version** (decided in substance by MIG-6). At the
+switch-over, in-flight actions either finish under the old program before the migration runs (drain), or are rejected
+and reported as failures (ACT-4) and retried by their caller. Queued actions not yet started are run under the new
+program, which is a Break for their signature if it changed. Draining is simplest and matches ACT-3's atomicity; it
+requires the migration to run between two versions of the dataset, never inside an action.
 
 ### 2.6 APIs
 
