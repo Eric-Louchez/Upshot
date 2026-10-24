@@ -1,12 +1,35 @@
 # Migration — design study
 
-How existing data, its history and its users follow a change to the program (MIG-1, MIG-2). This is a study, not a
-decision: MIG-1 says only that migration is integrated in Upshot and MIG-2 that it covers every kind of program
-change. Everything below marked **Proposal** is a proposal; where the spec decides something, the rule is cited.
+How existing data, its history and its users follow a change to the program (MIG-1 to MIG-7). This is a study; the
+decisions taken since are summarised below and stated in `spec/current/migration.md`. Everything else marked
+**Proposal** is a proposal; where the spec decides something, the rule is cited.
 
 Sources: L427008 (point 2: "an integrated migration story"), L427115 (persistent ids, under consideration, see
 `README.md`), L427237 (the kinds of change to cover); research 01 §1 (Tar Pit), §4 (lenses, Cambria), §9 (versioned
 data), §13 (identity and lifetime in computed collections).
+
+## Decided since this study (L427445)
+
+L427445 settles the main design (MIG-3 to MIG-7, VER-4); the sections below are read in its light:
+- **Parallel program versions** (MIG-3): a snapshot of the whole program is kept for each supported version; old and
+  new versions run in parallel during an upgrade, so upgrades are hot, with no downtime. This answers §5 question 1
+  (not one blocking step) and question 6 (in-flight actions and open sessions finish on the old version, P3).
+- **The migration transform** (MIG-4) goes from the old version's data zones to the new version's sources. It is a
+  metaprogramming operation (META-1), or a built-in one of the same kind. §3.1's classification still says which
+  parts of it Upshot can supply automatically.
+- **Automatic by matching structure** (MIG-5): a new source whose matching old value (source *or computed*) has the
+  same format, type and structure is migrated with nothing declared. This widens §4's Automatic class: a value that
+  was computed and becomes a source keeps its content.
+- **A migration is an action** (MIG-6, §3.2): atomic, its own transaction version, checked against the new
+  constraints; this answers §5 question 4 as P2 (a migration whose result breaks a constraint is rejected, and the
+  old version keeps running).
+- **History is never rewritten** (MIG-7, VER-4): old versions stay as they were, values may stop existing, new values
+  start without history. This answers §5 question 3 (a past computed value is what was computed then) and most of
+  question 2 (history spans program changes, P4).
+
+Still open from §5: whether the transform is a lens by default (question 5), cut-over of zones on different runtimes
+(7), accrete-only APIs (8), declaring convertible values (9), persistent ids (10), and when an old version stops
+being served.
 
 ## 1 Framing
 
