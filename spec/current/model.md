@@ -32,6 +32,15 @@ Source: L426464, J426467
 computed value is read-only (interpretation: J427010).
 Source: L427008, J427010
 
+**MODEL-10** Within one transaction, a computed value cannot have a run-time circular dependency: an evaluation
+that needs a value to compute that same value fails (ACT-4). Fixed-point dependencies, resolved by iterating until
+nothing changes, are forbidden (interpretation: J428306).
+Source: L428306, J428306
+
+**MODEL-11** A circular dependency in the program's static dependency graph is an error unless it is explicitly
+annotated, in which case it is allowed; MODEL-10 still holds for every evaluation (interpretation: J428307).
+Source: L428306, J428307
+
 **MODEL-9** Actions can convert a computed value into a source value, keeping its value and disconnecting it from
 what it was computed from, and, in principle, a source value into a computed value (interpretation: J427009). Any
 computed value can be converted to a source this way.

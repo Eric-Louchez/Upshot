@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L428060; L427115 under consideration); nothing of the language
+place; what Upshot is about is specified (L426464 to L428306; L427115 under consideration); nothing of the language
 is built yet.
 
 ## Focus
@@ -15,7 +15,7 @@ the prototype runs every program under its default strategy (J426465). No other 
 ## The shape of Upshot
 
 Two parts (LANG-6): the **feature language**, in which a program states its data as maintainable structures (MODEL-1),
-data sources and computed values (MODEL-2 to MODEL-4) and actions (ACT-1 to ACT-4) checked against validation
+data sources and computed values (MODEL-2 to MODEL-11) and actions (ACT-1 to ACT-4) checked against validation
 constraints (CONS-1, CONS-2), divided into data zones (ZONE-1) that interact only through each other's APIs of exposed
 values and actions (API-1 to API-6, ZONE-2, ZONE-3), with metaprogramming (META-1); and the **optimisation metadata**,
 written in the optimisation language (OPT-1 to OPT-9), which decides how that data is physically held and which
@@ -122,22 +122,12 @@ change), Datomic attributes (entities referred to by id).
   are allowed for actions and computed values (ACT-6). Open: inside a sequential action, whether a later step sees
   a value an earlier step wrote (read-your-own-writes, see Actions above); the per-target form reads only the dataset
   before the action.
-- **Cycles in computed dependencies** (L428060). *Proposal:* there is no general need for dynamic cycle resolution;
-  apparent cycles fall into three kinds, each handled its own way:
-  1. *conditional cycles between named values* (A = data, B = A + 1 when `flag`, the reverse otherwise): always
-     rewritable without a cycle by naming the roles (`first = data`, `second = first + 1`, A and B each choosing
-     by `flag`), and the rewrite is usually clearer. The compiler rejects them, with the rewrite as the suggested
-     fix. Condition-aware analysis could accept them instead, but would rarely be worth its complexity.
-  2. *recursion over the data's structure* (a directory's size is its files plus its subdirectories' sizes; an org
-     chart's head count; a bill of materials): the type-level dependency is a self-loop, but each instance is
-     acyclic whenever the data is (a tree). Common and a real need; rewriting it away means hand-written traversal
-     orders, far less understandable. Supported with dependencies tracked per instance, plus a constraint that the
-     reference relation it recurses over is acyclic (CONS-1), so an action that would create a cycle in the data is
-     rejected (CONS-2) instead of making a computation loop.
-  3. *genuine recursion over cyclic data* (reachability, shortest paths, PageRank, dataflow analyses): a real need,
-     defined as a fixpoint. Supported through an explicit fixpoint construct whose computation is monotone, as in
-     Datalog (least fixpoint, stratified negation; research 01 §5), so the result is unique and every evaluation
-     strategy finds it.
+- **Cycles in computed dependencies** (L428060, decided by L428306: MODEL-10, MODEL-11): no fixed points and no
+  run-time cycle within a transaction; a static cycle is a compile-time error unless explicitly annotated. Open: the
+  annotation's syntax and scope (on each value of the cycle, or on the cycle as a whole); whether recursion over the
+  data's structure also comes with a constraint that the reference relation is acyclic (CONS-1), so an action that
+  would make the data cyclic is rejected rather than a later evaluation failing; and how the compiler reports a
+  static cycle (suggesting a rewrite that names the roles, e.g. `first = data`, `second = first + 1`).
 - **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
   gets (one declared in the program, or one the action supplies), and whether the program declares which values
   may be converted.
