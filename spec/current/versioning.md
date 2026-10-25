@@ -17,3 +17,6 @@ Source: L426464, J426470
 **VER-3** Values have a version history, and a program has access to it. Whether the history is read directly or as
 an explicit list through observables is not yet decided (`plan/README.md`).
 Source: L427008
+
+**VER-4** The version history is never rewritten, a migration included (MIG-7).
+Source: L427445

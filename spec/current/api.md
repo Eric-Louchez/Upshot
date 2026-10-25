@@ -5,8 +5,9 @@ APIs, are in [`zones.md`](zones.md).
 
 Derived from the log; where it disagrees with the log, the log wins (spec/README.md).
 
-**API-1** The feature language lets a program specify one or more APIs.
-Source: L426531
+**API-1** The feature language lets a program specify one or more APIs; a data zone can expose several at once, e.g.
+an old and a new version of an API (interpretation: J427517).
+Source: L426531, L427516, J427517
 
 **API-2** An API is composed of **exposed values**, computed or source (MODEL-2), and **exposed actions** (ACT-1).
 Source: L426531

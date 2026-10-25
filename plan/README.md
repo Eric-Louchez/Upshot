@@ -4,7 +4,8 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L427098); nothing of the language is built yet.
+place; what Upshot is about is specified (L426464 to L428000; L427115 under consideration); nothing of the language
+is built yet.
 
 ## Focus
 
@@ -17,9 +18,40 @@ Two parts (LANG-6): the **feature language**, in which a program states its data
 data sources and computed values (MODEL-2 to MODEL-4) and actions (ACT-1 to ACT-4) checked against validation
 constraints (CONS-1, CONS-2), divided into data zones (ZONE-1) that interact only through each other's APIs of exposed
 values and actions (API-1 to API-6, ZONE-2, ZONE-3), with metaprogramming (META-1); and the **optimisation metadata**,
-written in the optimisation language (OPT-1 to OPT-7), which decides how that data is physically held and which
+written in the optimisation language (OPT-1 to OPT-9), which decides how that data is physically held and which
 runtime runs each zone (RUN-1) without changing what the program computes. All data is versioned and, ideally, the
 dataset reports its own state (VER-1, VER-2).
+
+## Under consideration: an authoritative, id-based persisted form
+
+L427115 (strongly considered, not yet decided): the programmer writes in a **user-facing language**, but the program
+is persisted in source control in an **authoritative language** in which every externally visible variable has a
+persistent, globally unique id (a GUID or OID), every reference uses the id, and the name is only a label. Renaming
+is free, a function moved from one API to another keeps its id, and components not tightly connected to the program
+(its optimisation metadata, programs that depend on its APIs, other zones) keep up through the ids.
+
+What it would settle or ease:
+- **Metadata in sync** (OPT-5): hints refer to ids, so renames and moves never break them.
+- **Migration** (MIG-1): renames and moves are no-ops for stored data; what is left to migrate is structural (a
+  field removed, a type changed, a source becoming computed), and an id-based diff states exactly that.
+- **Dependencies**: a dependency's refactoring reaches its users as id-preserving changes rather than breakage.
+
+Questions it raises:
+- *Who assigns ids, and how a rename is told from a delete plus an add.* Writing plain text in the user-facing
+  language loses that intent. Options: an editor or language server that tracks identity (the way projectional
+  editors do), explicit refactoring commands, or matching the new text to the old authoritative form on save
+  (heuristics, an LLM, the programmer confirming ambiguous cases).
+- *What gets an id*: "externally visible" variables (exposed values, actions, sources, computed values, types,
+  fields, zones, APIs); whether internal names need ids too.
+- *Readability in source control*: an authoritative text that still diffs and reviews well (e.g. each id next to
+  its current label), and merge conflicts when two branches create or rename the same element.
+- *Copy and paste*: whether a copied element keeps its id or gets a fresh one.
+- *Interaction with metaprogramming* (META-1): ids for structure computed at run time.
+
+Prior art to study: Unison (definitions identified by content hash, names stored apart as labels; research 01 §10),
+JetBrains MPS (projectional editing, references by persistent node id), Darklang (an id on every expression),
+Protocol Buffers field numbers and Cap'n Proto's 64-bit ids (persistent ids for schema elements, names free to
+change), Datomic attributes (entities referred to by id).
 
 ## Open questions
 
@@ -34,7 +66,7 @@ dataset reports its own state (VER-1, VER-2).
   what happens when a write cannot be carried back unambiguously.
 - **The prototype runtime** (RUN-2): in-memory only at first, or with a local store; how zones talk to each other
   through their APIs inside one process, and how a C/C++ program reaches a zone's API (LANG-3).
-- **APIs and zones** (API-1 to API-3, ZONE-1, ZONE-2): whether an API can span zones or a zone has several APIs,
+- **APIs and zones** (API-1 to API-3, ZONE-1, ZONE-2): whether an API can span zones (a zone can have several, API-1),
   and whether one zone's computed values may depend on another zone's exposed values (and how they stay current).
 - **Configuration values and web backends** (API-4 to API-6, ZONE-3, LANG-8): the suggested structure is the user
   zone and shared zone of ZONE-3. Open:
@@ -52,7 +84,10 @@ dataset reports its own state (VER-1, VER-2).
   (MIG-1), static checking and the native interface (LANG-3), which needs shapes known ahead of time.
 - **Exception handling** (ACT-4): how a function declares its handler, and what a handler receives (the failure,
   the rejected constraint); the handler runs as a separate action (L427098).
-- **The optimisation metadata** (OPT-1 to OPT-7; little to no work for now, LANG-7): its format, what it can
+- **Performance and relaxations** (OPT-8, OPT-9, LANG-9, REL-1 to REL-3): optimisations that Upshot's hard
+  constraints rule out, recovered by relaxation annotations the developer chooses; which annotations exist and their
+  syntax: [`performance.md`](performance.md).
+- **The optimisation metadata** (OPT-1 to OPT-9; little to no work for now, LANG-7): its format, what it can
   express (storage, in memory and/or database, indexes, materialised computed values), the default strategy
   without it (J426465), and how usage metrics are collected for generating it. Which databases it targets first
   (local; no cloud, LANG-4).
@@ -68,6 +103,20 @@ dataset reports its own state (VER-1, VER-2).
   reads a tentative view in which its own changes so far are applied and propagated (as databases let a
   transaction read its own writes), committed or discarded as a whole with the constraint check (CONS-2) at the
   end.
+- **Actions and computation functions** (ACT-5, L428000): an action is like a computation function temporarily
+  connected to the sources it modifies, but the direction is inverted: a computed value reads its sources and stays
+  connected; an action writes its sources and is connected for one transaction. Ways to reconcile the two
+  perspectives (proposals):
+  - *an action is a computed value frozen into sources*: the action's results are computed values over its inputs
+    and the current dataset, connected to the sources they target for the transaction, then converted to sources
+    and disconnected at commit (MODEL-9). Writing and computing are then one mechanism, and an action can use every
+    structure and annotation a computed value can;
+  - *an action is a write through a lens*: it assigns new values to (possibly computed) targets, and the two-way
+    paths (MODEL-4) carry them back to sources, so an action only ever "computes" its targets' new values;
+  - *the full inversion, event sourcing*: the sequence of actions is the real source, and every data source is a
+    value computed as a fold over the actions applied to it so far. Versioning (VER-1) and migration (MIG-6) already
+    treat the dataset as that sequence; the optimiser keeps the fold's current result stored, as for any computed
+    value. This removes the asymmetry entirely, but makes "source" a view rather than a primitive.
 - **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
   gets (one declared in the program, or one the action supplies), and whether the program declares which values
   may be converted.
@@ -75,12 +124,10 @@ dataset reports its own state (VER-1, VER-2).
   collection; what happens when a program change (a new computation function) makes existing data violate a
   constraint. Tar Pit (research 01 §1, its §10.3.3) suggests treating the program change like a change to data
   and checking it, or refusing to run the new program until the data is repaired; this ties into migration.
-- **Migration** (MIG-1): how data follows a program change: renames, reshaped structures, a source becoming
-  computed or the reverse, new constraints; how optimisation metadata that names program elements survives
-  renames; how versioned history reads across program versions. Tar Pit says almost nothing here: only that
-  changes to the essential state's specification may force changes to the logic and the hints, never the
-  reverse. Related work to study: Cambria's schema-version lenses (research 01 §4), Datomic's accrete-only schema
-  and Dolt's schema diffs (§9).
+- **Migration** (MIG-1 to MIG-7): decided in outline (L427445): parallel program versions kept as snapshots, a
+  migration transform from the old zones to the new sources, automatic where structure matches, run as one atomic
+  transaction between actions (L427505), history never rewritten, hot upgrades. The taxonomy, mechanisms and
+  remaining questions are in [`migration.md`](migration.md).
 - **Observers and history** (VER-1 to VER-3): observers are not yet defined (L427008). Questions:
   - is a value's version history read directly, or as an explicit list through observables (VER-3)?
   - are observer results automatic computed values, or components that trigger actions producing their own,

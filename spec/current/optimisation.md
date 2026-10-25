@@ -34,3 +34,13 @@ Source: L427008, J427011
 **OPT-7** How the parallel computed values of an API's configuration values (API-6) are held, cached, kept or
 recomputed every time, is decided by the optimisation layer.
 Source: L427098
+
+**OPT-8** The optimiser may, on its own, run actions in parallel when their data dependencies allow it without
+breaking atomicity, found by static analysis or by runtime analytics, and may decouple successive transactions by
+hot-path optimisation or by predicting values and rolling back a wrong guess; the outcome is always as if the actions
+ran one at a time (interpretation: J427529).
+Source: L427529, J427529
+
+**OPT-9** Relaxations of atomicity, such as letting an action operate on stale values, change results and so cannot
+be made by the optimiser on its own (OPT-2); the program declares them as relaxation annotations (REL-2, REL-3).
+Source: L427529, L428000

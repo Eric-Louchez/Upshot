@@ -25,3 +25,7 @@ an exception-handling function. A failed action's own changes still never take e
 separate action of its own, whose changes can take effect. A failure with no handler passes to the caller
 (interpretation: J427076, confirmed by L427098).
 Source: L427076, J427076, L427098
+
+**ACT-5** Actions are like computation functions temporarily connected to the source values they modify: they can
+use the same structures and annotations as computation functions (interpretation: J428001).
+Source: L428000, J428001
