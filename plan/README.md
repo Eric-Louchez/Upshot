@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L428316; L427115 under consideration); nothing of the language
+place; what Upshot is about is specified (L426464 to L428317; L427115 under consideration); nothing of the language
 is built yet.
 
 ## Focus
@@ -127,7 +127,9 @@ change), Datomic attributes (entities referred to by id).
   annotation's syntax and scope (on each value of the cycle, or on the cycle as a whole: TBD, L428316); and how the
   compiler reports a static cycle, e.g. suggesting a rewrite that names the roles (`first = data`,
   `second = first + 1`): TBD. Data can be cyclic (L428316), so a computed value recursing over data that happens to
-  be cyclic meets a run-time cycle, and that evaluation fails (MODEL-10).
+  be cyclic meets a run-time cycle: the action that triggers it fails and is rolled back (L428317, MODEL-10).
+  Open: how the runtime detects a cycle that an action would create in a value nobody reads, without evaluating
+  every computed value eagerly (e.g. by tracking which annotated cycles the changed data can reach).
 - **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
   gets (one declared in the program, or one the action supplies), and whether the program declares which values
   may be converted.

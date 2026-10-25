@@ -16,9 +16,9 @@ It can instead convert a computed value into a source, or a source into a comput
 Source: L426464, J426468, L427008
 
 **ACT-3** Actions are atomic: an action's changes all take effect together or not at all. An action that would
-violate a validation constraint is rejected (CONS-2). How an action can read computed values that depend on its own
+violate a validation constraint, or that triggers a cyclic dependency (MODEL-10), fails and is rolled back. How an action can read computed values that depend on its own
 changes so far, before it completes, is not yet decided (`plan/README.md`).
-Source: L427008, J427008
+Source: L427008, J427008, L428317
 
 **ACT-4** Functions (actions and computation functions) may contain exception handling: a failed function triggers
 an exception-handling function. A failed action's own changes still never take effect; the handler runs as a
