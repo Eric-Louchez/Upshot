@@ -29,3 +29,10 @@ Source: L427076, J427076, L427098
 **ACT-5** Actions are like computation functions temporarily connected to the source values they modify: they can
 use the same structures and annotations as computation functions (interpretation: J428001).
 Source: L428000, J428001
+
+**ACT-6** Actions and computation functions can each be written in either of two forms: as a sequence of operations
+some of which write to targets, or as one definition per target value (possibly through a helper that computes
+several values as a tuple, each target taking its entry). An action written per target defines the value of every
+target it writes; a computation function written as a sequence can produce several computed values
+(interpretation: J428060).
+Source: L428060, J428060

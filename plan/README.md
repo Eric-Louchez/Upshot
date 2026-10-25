@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L428000; L427115 under consideration); nothing of the language
+place; what Upshot is about is specified (L426464 to L428060; L427115 under consideration); nothing of the language
 is built yet.
 
 ## Focus
@@ -113,11 +113,32 @@ change), Datomic attributes (entities referred to by id).
     structure and annotation a computed value can;
   - *an action is a write through a lens*: it assigns new values to (possibly computed) targets, and the two-way
     paths (MODEL-4) carry them back to sources, so an action only ever "computes" its targets' new values;
-  - *the full inversion, event sourcing*: the sequence of actions is the real source, and every data source is a
-    value computed as a fold over the actions applied to it so far. Versioning (VER-1) and migration (MIG-6) already
-    treat the dataset as that sequence; the optimiser keeps the fold's current result stored, as for any computed
-    value. This removes the asymmetry entirely, but makes "source" a view rather than a primitive.
-- **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
+  - *event sourcing*: the sequence of actions is the real source, and every data source is computed as a fold
+    over the actions. L428060: this needs every version of every computed value (action n reads what action n−1
+    wrote) and leaves cycles that resolve only dynamically; nor is it the inversion meant. *Claude's note:* the
+    cycles disappear if versions are explicit in the semantics (action n reads version n−1 and defines version n,
+    as Dedalus and Bloom do, research 01 §11), so this is at most a storage model, not a way of writing.
+  The inversion meant (L428060) is about how functions are written: both the sequential and the per-target form
+  are allowed for actions and computed values (ACT-6). Open: inside a sequential action, whether a later step sees
+  a value an earlier step wrote (read-your-own-writes, see Actions above); the per-target form reads only the dataset
+  before the action.
+- **Cycles in computed dependencies** (L428060). *Proposal:* there is no general need for dynamic cycle resolution;
+  apparent cycles fall into three kinds, each handled its own way:
+  1. *conditional cycles between named values* (A = data, B = A + 1 when `flag`, the reverse otherwise): always
+     rewritable without a cycle by naming the roles (`first = data`, `second = first + 1`, A and B each choosing
+     by `flag`), and the rewrite is usually clearer. The compiler rejects them, with the rewrite as the suggested
+     fix. Condition-aware analysis could accept them instead, but would rarely be worth its complexity.
+  2. *recursion over the data's structure* (a directory's size is its files plus its subdirectories' sizes; an org
+     chart's head count; a bill of materials): the type-level dependency is a self-loop, but each instance is
+     acyclic whenever the data is (a tree). Common and a real need; rewriting it away means hand-written traversal
+     orders, far less understandable. Supported with dependencies tracked per instance, plus a constraint that the
+     reference relation it recurses over is acyclic (CONS-1), so an action that would create a cycle in the data is
+     rejected (CONS-2) instead of making a computation loop.
+  3. *genuine recursion over cyclic data* (reachability, shortest paths, PageRank, dataflow analyses): a real need,
+     defined as a fixpoint. Supported through an explicit fixpoint construct whose computation is monotone, as in
+     Datalog (least fixpoint, stratified negation; research 01 §5), so the result is unique and every evaluation
+     strategy finds it.
+- **Converting between source and computed**- **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
   gets (one declared in the program, or one the action supplies), and whether the program declares which values
   may be converted.
 - **Validation constraints** (CONS-1, CONS-2): syntax; whether a constraint can be scoped to an object or
