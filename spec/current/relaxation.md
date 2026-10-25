@@ -18,3 +18,21 @@ Source: L428000, J428000
 developer assesses each as a trade-off and states it in the program. The optimiser alone never relaxes a promise
 (OPT-2, OPT-9).
 Source: L428000
+
+## Validating only the values of interest
+
+**REL-4** Checking every constraint and every possible run-time cycle before each transaction commits can cost far
+more than the transaction, especially when each transaction changes much data but only sparse reads matter. An
+action can therefore carry an annotation naming a subset of data values of interest; only the path along those
+values is validated (interpretation: J428329).
+Source: L428329, J428329
+
+**REL-5** Under that annotation, values outside the validated path can end up failed (a broken constraint or a
+run-time cycle). A read that meets a failed value fails, and an action that reads a failed value fails. The
+transaction that caused it is not rolled back, unless its annotation says it is (interpretation: J428330).
+Source: L428329, J428330
+
+**REL-6** Failed values are repaired either by a rollback, possibly of several transactions until the real culprit
+is found, or by a transaction that fixes the root cause in the data without reading any of the failed values
+(interpretation: J428331).
+Source: L428329, J428331

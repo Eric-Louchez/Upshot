@@ -87,6 +87,7 @@ Candidate declarations, one per row of §2:
 | **Roughly ordered identities**: "fresh ids ordered by creation within a node, roughly across nodes; readers may see an earlier id appear later" | Snowflake or UUIDv7-style ids, each node committing and exposing its writes at once |
 | **Deferred constraint**: "must hold by the end of the batch" or "eventually, repaired by action R" | Batch or defer checks; sagas with compensation instead of distributed atomic commits |
 | **Assumed constraint**: "trusted, checked only in tests" | Skip the check in production (an explicit, visible risk) |
+| **Values of interest** on an action (REL-4 to REL-6, L428329): "validate only the path along these values" | Skip checking constraints and cycles elsewhere; values left unchecked can become failed, and their reads fail |
 | **Coarse history**: "versions of `x` may be coalesced", or "no history for `x`" | Group commit, in-place updates, throttled observers |
 | **Commutative actions**: "these actions commute" (or proven so) | Merge concurrent and offline writes without coordination (CRDT-style; CALM, research 01 §11) |
 | **Availability preference** for a cross-runtime API: "keep serving stale data during a partition" | Choose availability over consistency per API |
