@@ -38,8 +38,9 @@ nothing changes, are forbidden (interpretation: J428306).
 Source: L428306, J428306
 
 **MODEL-11** A circular dependency in the program's static dependency graph is an error unless it is explicitly
-annotated, in which case it is allowed; MODEL-10 still holds for every evaluation (interpretation: J428307).
-Source: L428306, J428307
+annotated, in which case it is allowed; MODEL-10 still holds for every evaluation (interpretation: J428307). Data
+itself can be cyclic (MODEL-1): no constraint keeps data acyclic because a computed value recurses over it.
+Source: L428306, J428307, L428316
 
 **MODEL-9** Actions can convert a computed value into a source value, keeping its value and disconnecting it from
 what it was computed from, and, in principle, a source value into a computed value (interpretation: J427009). Any

@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L428306; L427115 under consideration); nothing of the language
+place; what Upshot is about is specified (L426464 to L428316; L427115 under consideration); nothing of the language
 is built yet.
 
 ## Focus
@@ -124,10 +124,10 @@ change), Datomic attributes (entities referred to by id).
   before the action.
 - **Cycles in computed dependencies** (L428060, decided by L428306: MODEL-10, MODEL-11): no fixed points and no
   run-time cycle within a transaction; a static cycle is a compile-time error unless explicitly annotated. Open: the
-  annotation's syntax and scope (on each value of the cycle, or on the cycle as a whole); whether recursion over the
-  data's structure also comes with a constraint that the reference relation is acyclic (CONS-1), so an action that
-  would make the data cyclic is rejected rather than a later evaluation failing; and how the compiler reports a
-  static cycle (suggesting a rewrite that names the roles, e.g. `first = data`, `second = first + 1`).
+  annotation's syntax and scope (on each value of the cycle, or on the cycle as a whole: TBD, L428316); and how the
+  compiler reports a static cycle, e.g. suggesting a rewrite that names the roles (`first = data`,
+  `second = first + 1`): TBD. Data can be cyclic (L428316), so a computed value recursing over data that happens to
+  be cyclic meets a run-time cycle, and that evaluation fails (MODEL-10).
 - **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
   gets (one declared in the program, or one the action supplies), and whether the program declares which values
   may be converted.
