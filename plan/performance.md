@@ -29,21 +29,17 @@ recomputed and need not be reproducible. Opaqueness only holds if the language e
   each node or thread to get a disjoint prefix or range once, which is cheap but is coordination.
 
 **Ordered identities** (auto-increment, time-sortable ids as in Snowflake or UUIDv7, used for "newest first", range
-scans and append-only index locality) are also recoverable, if the strict semantics fixes only *that* there is one
-serial order of transactions, not *which* one. The order of actions that do not conflict is then the runtime's
-choice, so it can choose the order of the ids it allocated. This is timestamp ordering (as in Calvin, or Spanner's
-commit timestamps): each node stamps its actions from its own clock or counter with no coordination, and the
-sequence of transactions *is* the order of the stamps. Actions that do conflict coordinate anyway, and that same
-coordination settles their order. The result is better than hand-tuned Snowflake ids, whose order is only rough:
-here the id order is exactly the transaction order. The costs:
-- **Reading "the latest"** has to wait until no action with a smaller stamp can still arrive (a watermark, like
-  Timely's frontiers or Spanner's safe time): latency, not coordination, and visible through propagation status
-  (VER-2, L427057).
-- **Dependencies**: an action that reads another's result must get a larger stamp; a stamp that comes too late
-  forces a retry (hybrid logical clocks keep this rare).
-- **Real-time order**: if Upshot promises that an action submitted after another completed is also later in the
-  sequence (strict serialisability), stamps must also respect real time, which needs bounded clocks and a commit
-  wait (Spanner's TrueTime) or coordination. Whether Upshot promises this is open (§4).
+scans and append-only index locality) split in two:
+- **Exact creation order** is recoverable by the optimiser alone, if the strict semantics fixes only *that* there is
+  one serial order of transactions, not *which* one (§4 question 6). The runtime then orders actions that do not
+  conflict by the stamps each node allocated from its own clock or counter (timestamp ordering, as in Calvin or
+  Spanner's commit timestamps). But exact order has a price no implementation avoids: a reader of "the latest" must
+  wait until no action with a smaller stamp can still arrive (a watermark). A hand-built system with exact order
+  pays the same.
+- **The hand-built Snowflake profile** (each node commits and exposes its writes at once, and readers accept that an
+  item with a smaller id may appear later) is cheaper because its semantics are weaker: its order is only rough, and
+  a reader can see it change. That is a different result, so the optimiser cannot choose it alone (OPT-2, OPT-9);
+  with the declared relaxation **roughly ordered identities** (§3) it can, with exactly the same performance.
 
 Two limits even here:Two limits even here:
 - **Speculation cannot cross an external effect.** A guessed value that reaches a client, the harness or another
@@ -63,6 +59,7 @@ Two limits even here:Two limits even here:
 | **Metadata never changes results** (OPT-2), so results are exact and deterministic | Approximate aggregates and sketches (HyperLogLog, sampling); approximate nearest-neighbour indexes for vector search; reduced precision and quantisation; lossy compression; floating-point reassociation (parallel or SIMD/GPU reductions give slightly different sums); load shedding and degraded answers under load; "any element will do" choices made by whichever thread wins |
 | **All data versioned, history never rewritten** (VER-1, VER-4) | Overwriting in place with no history for hot values; merging several actions into one version (group commit that hides intermediate versions); coalescing or throttling what observers see |
 | **Zones meet only through APIs** (ZONE-2) | Sharing memory or a database across modules; an action that atomically changes two zones (if APIs do not offer that) |
+| **Exact semantics** (OPT-2), applied to ordered identities | Uncoordinated ids whose order is only rough, exposed at once (Snowflake): exact order makes readers of "the latest" wait for a watermark |
 | **Zones on different runtimes stay consistent** | Choosing availability over consistency during a network partition (AP systems): with strict semantics a partitioned zone must stop serving |
 
 ## 3 Proposal: relaxations are declared result sets
@@ -83,12 +80,17 @@ Candidate declarations, one per row of §2:
 | **Tolerance** on a computed value: "within ε", "within 1% with 99% confidence" | Sketches, sampling, reduced precision, reassociated floating-point reductions |
 | **Approximate retrieval**: "top-k with recall ≥ r" | Approximate nearest-neighbour and other approximate indexes |
 | **Nondeterministic choice**: "any element of…", "in any order" | Let whichever thread or shard finishes first decide |
+| **Roughly ordered identities**: "fresh ids ordered by creation within a node, roughly across nodes; readers may see an earlier id appear later" | Snowflake or UUIDv7-style ids, each node committing and exposing its writes at once |
 | **Deferred constraint**: "must hold by the end of the batch" or "eventually, repaired by action R" | Batch or defer checks; sagas with compensation instead of distributed atomic commits |
 | **Assumed constraint**: "trusted, checked only in tests" | Skip the check in production (an explicit, visible risk) |
 | **Coarse history**: "versions of `x` may be coalesced", or "no history for `x`" | Group commit, in-place updates, throttled observers |
 | **Commutative actions**: "these actions commute" (or proven so) | Merge concurrent and offline writes without coordination (CRDT-style; CALM, research 01 §11) |
 | **Availability preference** for a cross-runtime API: "keep serving stale data during a partition" | Choose availability over consistency per API |
 | **Degraded result** for an action under load: "may return the cached answer or reject" | Load shedding |
+
+The standard for LANG-9 is **the same performance for the same semantics**. A hand-built system is often faster
+because its semantics are weaker, mostly without saying so; Upshot matches it exactly once the program declares
+that weaker semantics, and the optimiser alone matches it wherever the semantics are already the same.
 
 Commutativity is partly free: where the optimiser can prove that actions commute (counters, set inserts), it can
 already merge them without changing results; the declaration only matters where it cannot prove it.
