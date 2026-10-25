@@ -28,7 +28,22 @@ recomputed and need not be reproducible. Opaqueness only holds if the language e
 - **global** uniqueness without any coordination is only probabilistic (random 128-bit ids); exact uniqueness needs
   each node or thread to get a disjoint prefix or range once, which is cheap but is coordination.
 
-What opaqueness cannot give is §2's row on ordered identities.
+**Ordered identities** (auto-increment, time-sortable ids as in Snowflake or UUIDv7, used for "newest first", range
+scans and append-only index locality) are also recoverable, if the strict semantics fixes only *that* there is one
+serial order of transactions, not *which* one. The order of actions that do not conflict is then the runtime's
+choice, so it can choose the order of the ids it allocated. This is timestamp ordering (as in Calvin, or Spanner's
+commit timestamps): each node stamps its actions from its own clock or counter with no coordination, and the
+sequence of transactions *is* the order of the stamps. Actions that do conflict coordinate anyway, and that same
+coordination settles their order. The result is better than hand-tuned Snowflake ids, whose order is only rough:
+here the id order is exactly the transaction order. The costs:
+- **Reading "the latest"** has to wait until no action with a smaller stamp can still arrive (a watermark, like
+  Timely's frontiers or Spanner's safe time): latency, not coordination, and visible through propagation status
+  (VER-2, L427057).
+- **Dependencies**: an action that reads another's result must get a larger stamp; a stamp that comes too late
+  forces a retry (hybrid logical clocks keep this rare).
+- **Real-time order**: if Upshot promises that an action submitted after another completed is also later in the
+  sequence (strict serialisability), stamps must also respect real time, which needs bounded clocks and a commit
+  wait (Spanner's TrueTime) or coordination. Whether Upshot promises this is open (§4).
 
 Two limits even here:Two limits even here:
 - **Speculation cannot cross an external effect.** A guessed value that reaches a client, the harness or another
@@ -46,7 +61,6 @@ Two limits even here:Two limits even here:
 | **Constraints always hold, checked per action** (CONS-1, CONS-2) | Skipping invariant checks on hot paths ("the caller guarantees it"); deferred or batched checking with later repair; sampling checks; uniqueness enforced only per shard |
 | **Computed values always consistent with their sources** (MODEL-2) | Asynchronously refreshed views and search indexes; counters and denormalised copies updated in the background; periodic recomputation of expensive aggregates |
 | **Metadata never changes results** (OPT-2), so results are exact and deterministic | Approximate aggregates and sketches (HyperLogLog, sampling); approximate nearest-neighbour indexes for vector search; reduced precision and quantisation; lossy compression; floating-point reassociation (parallel or SIMD/GPU reductions give slightly different sums); load shedding and degraded answers under load; "any element will do" choices made by whichever thread wins |
-| **Deterministic semantics with one sequence of transactions**, applied to fresh identities | Ids that are both uncoordinated and ordered: auto-increment or time-sortable ids (Snowflake, UUIDv7) used for "newest first", range scans and append-only index locality. Exact creation order under parallel actions needs the order of the transactions; hand-tuned systems accept ids that are only roughly time-ordered (per node), which changes results |
 | **All data versioned, history never rewritten** (VER-1, VER-4) | Overwriting in place with no history for hot values; merging several actions into one version (group commit that hides intermediate versions); coalescing or throttling what observers see |
 | **Zones meet only through APIs** (ZONE-2) | Sharing memory or a database across modules; an action that atomically changes two zones (if APIs do not offer that) |
 | **Zones on different runtimes stay consistent** | Choosing availability over consistency during a network partition (AP systems): with strict semantics a partitioned zone must stop serving |
@@ -69,7 +83,6 @@ Candidate declarations, one per row of §2:
 | **Tolerance** on a computed value: "within ε", "within 1% with 99% confidence" | Sketches, sampling, reduced precision, reassociated floating-point reductions |
 | **Approximate retrieval**: "top-k with recall ≥ r" | Approximate nearest-neighbour and other approximate indexes |
 | **Nondeterministic choice**: "any element of…", "in any order" | Let whichever thread or shard finishes first decide |
-| **Roughly ordered identities**: "fresh ids ordered by creation within a node, roughly across nodes" | Snowflake or UUIDv7-style ids with no coordination |
 | **Deferred constraint**: "must hold by the end of the batch" or "eventually, repaired by action R" | Batch or defer checks; sagas with compensation instead of distributed atomic commits |
 | **Assumed constraint**: "trusted, checked only in tests" | Skip the check in production (an explicit, visible risk) |
 | **Coarse history**: "versions of `x` may be coalesced", or "no history for `x`" | Group commit, in-place updates, throttled observers |
@@ -97,3 +110,7 @@ What the declared sets must preserve:
 4. Floating point: is bit-exact reproducibility across runtimes (CPU, SIMD, GPU) required by default, or is a
    default tolerance acceptable?
 5. Can an action change two zones atomically, or are cross-zone changes always separate actions (sagas)?
+6. Is the sequence of transactions fixed by when actions are submitted (real-time order, strict serialisability), or
+   only required to exist, with the order of non-conflicting actions chosen by the runtime? The second lets the
+   optimiser do much more (ordered identities with no coordination, §1); the first is what a user who submits
+   actions one after another may expect.
