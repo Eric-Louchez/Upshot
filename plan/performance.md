@@ -12,16 +12,25 @@ lazy, indexes, layouts, caching that is always invalidated, memoisation of confi
 OPT-7); inlining across zones on the same runtime; incremental constraint checking; copy-on-write versions;
 retention of history nobody can read (plan, identity and lifetime).
 
-Fresh identities belong here too, on one condition. An action that creates a new object (a new order) needs an
+Fresh identities belong here too, with conditions. An action that creates a new object (a new order) needs an
 identity nobody has used. If the language makes such identities **opaque** (a program can only compare them for
-equality, never read a number or an order out of them), the optimiser can allocate them however is cheapest:
-per-thread or per-node counters, ranges handed out in advance, clock-based ids, with no coordination, because no
-result can tell the difference. Only if identity values were observable (printed, sorted, exposed as numbers through
-an API) and defined by the position in the sequence of transactions would allocation have to follow that order. So
-the proposal is opaque fresh identities by default, with any observable form (a readable order number) declared
-as an ordinary computed or source value.
+equality), the optimiser can allocate them however is cheapest: per-thread or per-node counters, ranges handed out in
+advance, with no coordination. Fresh identities are source data (stored when the action commits), so they are never
+recomputed and need not be reproducible. Opaqueness only holds if the language enforces what follows from it:
+- a collection keyed by fresh identities has **no order** of its own: anything order-dependent over it (the first
+  element, a list sent through an API, even a floating-point sum) needs an explicit order from the program, or the
+  allocation strategy leaks into results;
+- identities are **never reused**, since history (VER-1) and lifetime A (MODEL-7) can still refer to a deleted
+  object; the optimiser can still use compact internal forms (generational indices) under a stable external one;
+- at the boundary (the harness, C/C++ code, API clients, other runtimes) an identity needs a representation, which is
+  then **fixed at allocation**: the optimiser cannot later switch to denser ids without a translation table at the
+  boundary;
+- **global** uniqueness without any coordination is only probabilistic (random 128-bit ids); exact uniqueness needs
+  each node or thread to get a disjoint prefix or range once, which is cheap but is coordination.
 
-Two limits even here:
+What opaqueness cannot give is §2's row on ordered identities.
+
+Two limits even here:Two limits even here:
 - **Speculation cannot cross an external effect.** A guessed value that reaches a client, the harness or another
   runtime cannot be rolled back. Outputs must be held until the speculation is confirmed (the output-commit problem),
   which caps how far speculation decouples successive transactions.
@@ -37,6 +46,7 @@ Two limits even here:
 | **Constraints always hold, checked per action** (CONS-1, CONS-2) | Skipping invariant checks on hot paths ("the caller guarantees it"); deferred or batched checking with later repair; sampling checks; uniqueness enforced only per shard |
 | **Computed values always consistent with their sources** (MODEL-2) | Asynchronously refreshed views and search indexes; counters and denormalised copies updated in the background; periodic recomputation of expensive aggregates |
 | **Metadata never changes results** (OPT-2), so results are exact and deterministic | Approximate aggregates and sketches (HyperLogLog, sampling); approximate nearest-neighbour indexes for vector search; reduced precision and quantisation; lossy compression; floating-point reassociation (parallel or SIMD/GPU reductions give slightly different sums); load shedding and degraded answers under load; "any element will do" choices made by whichever thread wins |
+| **Deterministic semantics with one sequence of transactions**, applied to fresh identities | Ids that are both uncoordinated and ordered: auto-increment or time-sortable ids (Snowflake, UUIDv7) used for "newest first", range scans and append-only index locality. Exact creation order under parallel actions needs the order of the transactions; hand-tuned systems accept ids that are only roughly time-ordered (per node), which changes results |
 | **All data versioned, history never rewritten** (VER-1, VER-4) | Overwriting in place with no history for hot values; merging several actions into one version (group commit that hides intermediate versions); coalescing or throttling what observers see |
 | **Zones meet only through APIs** (ZONE-2) | Sharing memory or a database across modules; an action that atomically changes two zones (if APIs do not offer that) |
 | **Zones on different runtimes stay consistent** | Choosing availability over consistency during a network partition (AP systems): with strict semantics a partitioned zone must stop serving |
@@ -59,6 +69,7 @@ Candidate declarations, one per row of §2:
 | **Tolerance** on a computed value: "within ε", "within 1% with 99% confidence" | Sketches, sampling, reduced precision, reassociated floating-point reductions |
 | **Approximate retrieval**: "top-k with recall ≥ r" | Approximate nearest-neighbour and other approximate indexes |
 | **Nondeterministic choice**: "any element of…", "in any order" | Let whichever thread or shard finishes first decide |
+| **Roughly ordered identities**: "fresh ids ordered by creation within a node, roughly across nodes" | Snowflake or UUIDv7-style ids with no coordination |
 | **Deferred constraint**: "must hold by the end of the batch" or "eventually, repaired by action R" | Batch or defer checks; sagas with compensation instead of distributed atomic commits |
 | **Assumed constraint**: "trusted, checked only in tests" | Skip the check in production (an explicit, visible risk) |
 | **Coarse history**: "versions of `x` may be coalesced", or "no history for `x`" | Group commit, in-place updates, throttled observers |
