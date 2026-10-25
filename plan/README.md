@@ -138,7 +138,7 @@ change), Datomic attributes (entities referred to by id).
      defined as a fixpoint. Supported through an explicit fixpoint construct whose computation is monotone, as in
      Datalog (least fixpoint, stratified negation; research 01 §5), so the result is unique and every evaluation
      strategy finds it.
-- **Converting between source and computed**- **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
+- **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
   gets (one declared in the program, or one the action supplies), and whether the program declares which values
   may be converted.
 - **Validation constraints** (CONS-1, CONS-2): syntax; whether a constraint can be scoped to an object or
