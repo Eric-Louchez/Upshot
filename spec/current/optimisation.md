@@ -42,5 +42,5 @@ ran one at a time (interpretation: J427529).
 Source: L427529, J427529
 
 **OPT-9** Relaxations of atomicity, such as letting an action operate on stale values, change results and so cannot
-be made by the optimiser on its own (OPT-2).
-Source: L427529
+be made by the optimiser on its own (OPT-2); the program declares them as relaxation annotations (REL-2, REL-3).
+Source: L427529, L428000

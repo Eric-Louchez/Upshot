@@ -15,6 +15,7 @@ What is built, as the user asked for it.
 | [`current/language.md`](current/language.md) | LANG- | What Upshot is and why, its two parts (the feature language and the optimisation metadata), what it is implemented in, what it targets, what is out of scope and the current focus. |
 | [`current/api.md`](current/api.md) | API- | APIs: exposed values (read-only or read/write), exposed actions, configuration values. |
 | [`current/zones.md`](current/zones.md) | ZONE- | Data zones, how they interact, the suggested web backend zones. |
+| [`current/relaxation.md`](current/relaxation.md) | REL- | Relaxation annotations: trading built-in promises for performance. |
 | [`current/runtime.md`](current/runtime.md) | RUN- | Runtimes: the assignment of zones to runtimes, the prototype runtime, later runtimes. |
 | [`current/constraints.md`](current/constraints.md) | CONS- | Validation constraints and the rejection of actions that break them. |
 | [`current/meta.md`](current/meta.md) | META- | Metaprogramming: structure and APIs computed from other values. |

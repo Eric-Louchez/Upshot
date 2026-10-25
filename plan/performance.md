@@ -4,6 +4,10 @@ LANG-9 (L427529): Upshot should, in theory, reach the best hand-tuned performanc
 hard constraints rule out must be addressed. This study lists those optimisations and proposes how each could be
 recovered. Everything here is a proposal unless a rule is cited.
 
+Decided since (L428000, REL-1 to REL-3): every performance deviation from hand-built code is addressed by
+relaxation annotations in the feature-language program, chosen by the developer as a trade-off; the optimiser never
+relaxes a promise alone. §3's declarations are candidates for those annotations; §4 question 1 is answered.
+
 ## 1 What the optimiser can already do alone
 
 Anything whose outcome is identical to the strict semantics: concurrent execution of independent actions,

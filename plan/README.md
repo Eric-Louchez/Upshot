@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L427529; L427115 under consideration); nothing of the language
+place; what Upshot is about is specified (L426464 to L428000; L427115 under consideration); nothing of the language
 is built yet.
 
 ## Focus
@@ -84,8 +84,9 @@ change), Datomic attributes (entities referred to by id).
   (MIG-1), static checking and the native interface (LANG-3), which needs shapes known ahead of time.
 - **Exception handling** (ACT-4): how a function declares its handler, and what a handler receives (the failure,
   the rejected constraint); the handler runs as a separate action (L427098).
-- **Performance and relaxations** (OPT-8, OPT-9, LANG-9): optimisations that Upshot's hard constraints rule out,
-  and a proposal to recover them as declared sets of acceptable results: [`performance.md`](performance.md).
+- **Performance and relaxations** (OPT-8, OPT-9, LANG-9, REL-1 to REL-3): optimisations that Upshot's hard
+  constraints rule out, recovered by relaxation annotations the developer chooses; which annotations exist and their
+  syntax: [`performance.md`](performance.md).
 - **The optimisation metadata** (OPT-1 to OPT-9; little to no work for now, LANG-7): its format, what it can
   express (storage, in memory and/or database, indexes, materialised computed values), the default strategy
   without it (J426465), and how usage metrics are collected for generating it. Which databases it targets first
@@ -102,6 +103,20 @@ change), Datomic attributes (entities referred to by id).
   reads a tentative view in which its own changes so far are applied and propagated (as databases let a
   transaction read its own writes), committed or discarded as a whole with the constraint check (CONS-2) at the
   end.
+- **Actions and computation functions** (ACT-5, L428000): an action is like a computation function temporarily
+  connected to the sources it modifies, but the direction is inverted: a computed value reads its sources and stays
+  connected; an action writes its sources and is connected for one transaction. Ways to reconcile the two
+  perspectives (proposals):
+  - *an action is a computed value frozen into sources*: the action's results are computed values over its inputs
+    and the current dataset, connected to the sources they target for the transaction, then converted to sources
+    and disconnected at commit (MODEL-9). Writing and computing are then one mechanism, and an action can use every
+    structure and annotation a computed value can;
+  - *an action is a write through a lens*: it assigns new values to (possibly computed) targets, and the two-way
+    paths (MODEL-4) carry them back to sources, so an action only ever "computes" its targets' new values;
+  - *the full inversion, event sourcing*: the sequence of actions is the real source, and every data source is a
+    value computed as a fold over the actions applied to it so far. Versioning (VER-1) and migration (MIG-6) already
+    treat the dataset as that sequence; the optimiser keeps the fold's current result stored, as for any computed
+    value. This removes the asymmetry entirely, but makes "source" a view rather than a primitive.
 - **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
   gets (one declared in the program, or one the action supplies), and whether the program declares which values
   may be converted.

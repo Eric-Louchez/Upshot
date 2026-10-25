@@ -27,8 +27,8 @@ Source: L426464, J426464
 
 **LANG-9** Upshot aims to allow, in theory, the best hand-tuned performance: every scenario in which its hard
 constraints would rule out an optimisation available to hand-tuned code is to be addressed (interpretation:
-J427530).
-Source: L427529, J427530
+J427530), by relaxation annotations the developer chooses (REL-2).
+Source: L427529, J427530, L428000
 
 ## Implementation and targets
 
