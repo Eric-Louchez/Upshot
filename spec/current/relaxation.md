@@ -33,6 +33,11 @@ transaction that caused it is not rolled back, unless its annotation says it is 
 Source: L428329, J428330
 
 **REL-6** Failed values are repaired either by a rollback, possibly of several transactions until the real culprit
-is found, or by a transaction that fixes the root cause in the data without reading any of the failed values
-(interpretation: J428331).
-Source: L428329, J428331
+is found, or by a transaction that fixes the root cause in the data without reading any of the failed values. A
+rollback undoes a transaction as if it never happened, and the actions after it are replayed (interpretation:
+J428350).
+Source: L428329, L428350, J428350
+
+**REL-7** A program can read the state of a failed value (that it is failed, and why) without failing, so a data
+zone can, if so desired, be made significantly resilient to errors (interpretation: J428351).
+Source: L428350, J428351

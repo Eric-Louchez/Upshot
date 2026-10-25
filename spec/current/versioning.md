@@ -18,5 +18,8 @@ Source: L426464, J426470
 an explicit list through observables is not yet decided (`plan/README.md`).
 Source: L427008
 
-**VER-4** The version history is never rewritten, a migration included (MIG-7).
-Source: L427445
+**VER-4** A migration never rewrites the version history (MIG-7). [NEEDS USER: a rollback undoes a transaction as if
+it never happened and replays the later actions (REL-6, L428350). Does the history then keep the versions as they
+were first recorded (the undone transaction and the replayed actions' first results stay readable, e.g. as an
+abandoned branch), or is the history replaced by the replayed one?]
+Source: L427445, L428350
