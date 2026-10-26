@@ -18,8 +18,10 @@ Source: L426464, J426470
 an explicit list through observables is not yet decided (`plan/README.md`).
 Source: L427008
 
-**VER-4** A migration never rewrites the version history (MIG-7). [NEEDS USER: a rollback undoes a transaction as if
-it never happened and replays the later actions (REL-6, L428350). Does the history then keep the versions as they
-were first recorded (the undone transaction and the replayed actions' first results stay readable, e.g. as an
-abandoned branch), or is the history replaced by the replayed one?]
-Source: L427445, L428350
+**VER-4** Ordinary operation never rewrites the version history: actions and migrations (MIG-7) only add to it.
+Source: L427445, L429753, J429753
+
+**VER-5** App admins can rewrite history when they want to, e.g. to erase or correct past versions. A rollback
+(REL-6) is such a rewrite: the replayed history replaces the old one, unless the admin chooses to keep the versions
+as first recorded (interpretation: J429753).
+Source: L428350, L429753, J429753
