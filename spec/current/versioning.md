@@ -14,14 +14,19 @@ recomputed or the latest version not being available yet (interpretation: J42647
 requirement.
 Source: L426464, J426470
 
-**VER-3** Values have a version history, and a program has access to it. Whether the history is read directly or as
-an explicit list through observables is not yet decided (`plan/README.md`).
-Source: L427008
+**VER-3** Values have a version history, and the feature language gives full access to the historical versions of
+each value: those of the single canonical history (VER-6). Whether the history is read directly or as an explicit
+list through observables is not yet decided (`plan/README.md`).
+Source: L427008, L429758
 
-**VER-4** Ordinary operation never rewrites the version history: actions and migrations (MIG-7) only add to it.
-Source: L427445, L429753, J429753
+**VER-4** Migrations cannot rewrite history (MIG-7).
+Source: L427445, L429758
 
-**VER-5** App admins can rewrite history when they want to, e.g. to erase or correct past versions. A rollback
-(REL-6) is such a rewrite: the replayed history replaces the old one, unless the admin chooses to keep the versions
-as first recorded (interpretation: J429753).
-Source: L428350, L429753, J429753
+**VER-5** History can be rewritten by undoing or reshuffling applied transactions: the data is rolled back to before
+the transaction to undo and all the transactions after it are replayed (REL-6). App admins need to be able to do this
+when they want to (interpretation: J429758).
+Source: L428350, L429753, L429758, J429758
+
+**VER-6** After a rewrite there is still a single canonical history, the one the app sees. Whether the runtime holds
+on to the alternate histories is up to the runtime; from inside the app there is no way to access them.
+Source: L429758

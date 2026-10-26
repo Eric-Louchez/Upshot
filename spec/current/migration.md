@@ -43,9 +43,9 @@ Source: L427445, J427448, L427505, J427505
 
 ## History
 
-**MIG-7** A migration never rewrites the version history. After it, some values may no longer exist (as identified by
+**MIG-7** A migration cannot rewrite the version history. After it, some values may no longer exist (as identified by
 their instance id) and new values may exist with no history from before the migration; neither is new to the system.
-Source: L427445
+Source: L427445, L429758
 
 ## Clients and APIs across a migration
 
