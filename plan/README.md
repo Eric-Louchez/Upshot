@@ -4,7 +4,7 @@ How Upshot is built and how far it has got. Builds on `spec/current/` (cited by 
 studies in `research/`.
 
 Status: **setup** (2026-10-24). The repository, its Claude configuration and the spec tooling (`tooling/up`) are in
-place; what Upshot is about is specified (L426464 to L429771; L427115 under consideration); nothing of the language
+place; what Upshot is about is specified (L426464 to L434366; L427115 under consideration); nothing of the language
 is built yet.
 
 ## Focus
@@ -136,26 +136,16 @@ change), Datomic attributes (entities referred to by id).
   invokes a rewrite, and what happens to effects that already left the system (a replayed action's earlier result was
   seen by a client or another zone), and its cost when many actions follow. Reading a failed value's state never fails
   (REL-7).
-- **Effects that left the system before a history rewrite** (VER-7, L429771). *Proposals*, meant to be combined; the
-  point is to replace judgement (does this rewrite change what a third party saw?) with mechanical checks:
-  1. *Stable transaction identity.* A transaction gets an opaque id once, and replay keeps it; only its position in
-     the sequence changes (as Jujutsu's change ids survive a rebase, while Git's commit hashes do not). An undone
-     transaction's id simply ceases to exist. A value sent out names the transaction that produced it by that id, so
-     the id problem of L429771 disappears for every transaction that is not undone.
-  2. *An export log and a replay diff.* Everything that crosses the app's boundary (API responses, values sent to
-     the harness or other zones) is recorded with the value, its transaction id and its version. A rewrite replays
-     and compares each recorded export with what the replay produces at the same point. "Unchanged" is then an
-     exact comparison, not an inference: the rewrite either reproduces every export, or yields the precise list of
-     exports that diverge. The cost is storing what was exported, which is bounded by what left the system.
-  3. *A divergence policy, declared by the developer* per exposed value or API (the developer knows which outside
-     parties care, REL-3): **reject** the rewrite if any export diverges (the default); **pin** the exported value,
-     so the replay treats it as a source with the recorded value and anything inconsistent with it becomes a failed
-     value to repair (REL-5, REL-7); **compensate** by running a declared action that tells the third party (a
-     correction, as accounting posts a reversing entry); or **accept** the divergence as unobservable.
-  4. *The admin's decision.* When the policy is reject, the runtime shows the admin the divergences found by the
-     diff, and the admin narrows the rewrite (undo fewer transactions, keep one pinned) or overrides.
-  With 1 and 2, L429771's scenario (every exported value unchanged, only ids at risk) is checked exactly; 3 and 4
-  cover the cases where it does not hold.
+- **Effects that left the system before a history rewrite** (VER-7, VER-8, L429771, L434366): a rewrite is a narrow
+  admin tool scoped to one zone; exports are rejected from change by default, compensation (ACT-7) is the normal
+  fix, legal erasure is separate. Remaining proposals: stable transaction ids that survive replay (as Jujutsu's
+  change ids survive a rebase), so an export names its transaction by an id the replay keeps; an export log with a
+  replay diff, so "unchanged" is an exact comparison; and divergence policies other than reject (pin, compensate,
+  accept), declared per exposed value or API.
+- **Atomicity inside a zone, partitioned** (L434366): Helland's entities are items inside a zone, and splitting a
+  zone's atomicity by entity both changes results and depends on data-structure details. Proposal: footprint
+  partitioning by the optimiser (no change in results) plus consistency scopes declared in feature terms (the only
+  relaxation): [`consistency-scopes.md`](consistency-scopes.md).
 - **Converting between source and computed** (MODEL-9): which computation a source converted to a computed value
   gets (one declared in the program, or one the action supplies), and whether the program declares which values
   may be converted.

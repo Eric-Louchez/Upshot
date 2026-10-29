@@ -32,3 +32,8 @@ Source: L427076
 from them. Those computed values are not needed while no use of the API with that configuration value is active;
 whether they are cached, kept or recomputed every time is an optimisation concern (OPT-2).
 Source: L427098
+
+**API-7** Effects that leave a zone (calls to another zone's API, values sent to the harness or third parties) are
+sent only once the action that produced them has committed (the outbox pattern), and actions reached through an API
+can be made idempotent, so a retried call has no further effect (interpretation: J434367).
+Source: L434366, J434367

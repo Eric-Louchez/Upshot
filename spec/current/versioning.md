@@ -30,8 +30,14 @@ Source: L428350, L429753, L429758, J429758, L429771
 
 **VER-7** A history rewrite must support the scenario where every value already sent to a third party stays unchanged,
 even if the id of the transaction it came from changes (interpretation: J429771). Deciding whether a rewrite preserves
-them cannot be left to the runtime's judgement alone; how it is decided is open (`plan/README.md`).
+them cannot be left to the runtime's judgement alone.
 Source: L429771, J429771
+
+**VER-8** A history rewrite is a rare, narrow admin tool scoped to one zone. Everything that left the zone counts as
+exported; by default a rewrite that would change an export is rejected, and compensation (ACT-7) is the normal fix
+for exported mistakes. Erasure of data for legal reasons is a separate admin operation that removes data from the
+history without replaying anything (interpretation: J434368).
+Source: L434366, J434368
 
 **VER-6** After a rewrite there is still a single canonical history, the one the app sees. Whether the runtime holds
 on to the alternate histories is up to the runtime; from inside the app there is no way to access them.

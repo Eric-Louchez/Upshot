@@ -37,3 +37,8 @@ several values as a tuple, each target taking its entry). An action written per 
 target it writes; a computation function written as a sequence can produce several computed values
 (interpretation: J428060).
 Source: L428060, J428060
+
+**ACT-7** The initial built-in approach to undoing committed work is compensation: a new action that corrects what
+an earlier one did, not a rollback. A multi-step process whose steps are not one atomic action is a saga: each step
+is atomic on its own and has a declared compensating action (interpretation: J434366).
+Source: L434366, J434366
